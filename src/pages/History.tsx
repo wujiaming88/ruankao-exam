@@ -25,21 +25,7 @@ export default function History() {
   };
 
   return (
-    <div className="page">
-      <div className="home-header">
-        <div className="home-header-inner">
-          <h1>成绩记录</h1>
-          <p>所有考试与练习的历史记录</p>
-        </div>
-      </div>
-
-      <div className="home-nav">
-        <Link to="/">首页</Link>
-        <Link to="/history">成绩记录</Link>
-        <Link to="/mistakes">错题本</Link>
-      </div>
-
-      <div className="container">
+    <div className="container">
         {records.length === 0 ? (
           <div className="empty-state">
             <p>暂无考试记录</p>
@@ -112,7 +98,6 @@ export default function History() {
             </tbody>
           </table>
         )}
-      </div>
     </div>
   );
 }

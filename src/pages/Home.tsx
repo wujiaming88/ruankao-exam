@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { exams, paperLabel, availablePapers } from '../data';
 import type { Exam, ExamMode, PaperKind } from '../types';
 
@@ -28,7 +28,8 @@ function groupExams() {
 
 export default function Home() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<'all' | '真题' | '模拟题'>('all');
+  const [searchParams] = useSearchParams();
+  const filter = (searchParams.get('filter') || 'all') as 'all' | '真题' | '模拟题';
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
   const [selectTarget, setSelectTarget] = useState<SelectTarget | null>(null);
   const [mode, setMode] = useState<ExamMode>('exam');
@@ -75,33 +76,7 @@ export default function Home() {
   };
 
   return (
-    <div className="page">
-      <div className="home-header">
-        <div className="home-header-inner">
-          <h1>软考仿真机考系统</h1>
-          <p>覆盖历年真题与模拟题 · 综合知识 / 案例分析 / 论文 全流程仿真</p>
-        </div>
-      </div>
-
-      <div className="home-nav">
-        <Link to="/">首页</Link>
-        <Link to="/history">成绩记录</Link>
-        <Link to="/mistakes">错题本</Link>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 8 }}>
-          类型:
-        </span>
-        <select
-          value={filter}
-          onChange={e => setFilter(e.target.value as 'all' | '真题' | '模拟题')}
-          style={{ padding: '6px 10px', borderRadius: 4, border: '1px solid var(--border)' }}
-        >
-          <option value="all">全部</option>
-          <option value="真题">真题</option>
-          <option value="模拟题">模拟题</option>
-        </select>
-      </div>
-
+    <>
       <div className="home-main-layout">
         {/* 左侧科目导航栏 */}
         <aside className="subject-sidebar">
@@ -230,6 +205,6 @@ export default function Home() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

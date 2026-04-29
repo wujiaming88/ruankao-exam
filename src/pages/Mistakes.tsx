@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { loadMistakes, removeMistake } from '../storage';
 
 function formatDate(ts: number): string {
@@ -9,7 +9,8 @@ function formatDate(ts: number): string {
 
 export default function Mistakes() {
   const [mistakes, setMistakes] = useState(loadMistakes());
-  const [filter, setFilter] = useState<string>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const examFilter = searchParams.get('exam') || 'all';
 
   const byExam = useMemo(() => {
     const m = new Map<string, { title: string; items: typeof mistakes }>();
@@ -20,7 +21,17 @@ export default function Mistakes() {
     return Array.from(m.entries());
   }, [mistakes]);
 
-  const filtered = filter === 'all' ? mistakes : mistakes.filter(m => m.examId === filter);
+  const filtered = examFilter === 'all' ? mistakes : mistakes.filter(m => m.examId === examFilter);
+
+  const handleExamFilterChange = (examId: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (examId === 'all') {
+      params.delete('exam');
+    } else {
+      params.set('exam', examId);
+    }
+    setSearchParams(params);
+  };
 
   const onRemove = (examId: string, number: number) => {
     removeMistake(examId, number);
@@ -28,25 +39,14 @@ export default function Mistakes() {
   };
 
   return (
-    <div className="page">
-      <div className="home-header">
-        <div className="home-header-inner">
-          <h1>错题本</h1>
-          <p>自动收集考试模式中答错的综合知识题目</p>
-        </div>
-      </div>
-
-      <div className="home-nav">
-        <Link to="/">首页</Link>
-        <Link to="/history">成绩记录</Link>
-        <Link to="/mistakes">错题本</Link>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 8 }}>
+    <div className="container" style={{ marginTop: 24 }}>
+      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
           筛选考试:
         </span>
         <select
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
+          value={examFilter}
+          onChange={e => handleExamFilterChange(e.target.value)}
           style={{ padding: '6px 10px', borderRadius: 4, border: '1px solid var(--border)', maxWidth: 280 }}
         >
           <option value="all">全部 ({mistakes.length})</option>
@@ -57,8 +57,7 @@ export default function Mistakes() {
           ))}
         </select>
       </div>
-
-      <div className="container">
+      <div>
         {filtered.length === 0 ? (
           <div className="empty-state">
             <p>错题本是空的</p>
