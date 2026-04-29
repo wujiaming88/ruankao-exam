@@ -33,6 +33,22 @@ export default function Home() {
   const [selectTarget, setSelectTarget] = useState<SelectTarget | null>(null);
   const [mode, setMode] = useState<ExamMode>('exam');
 
+  const subjects = useMemo(
+    () => Array.from(new Set(exams.map(e => e.subject))).sort(),
+    []
+  );
+
+  // 统计每个科目的试卷数量
+  const subjectCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const exam of exams) {
+      const current = counts.get(exam.subject) || 0;
+      const filtered = filter === 'all' || exam.kind === filter;
+      if (filtered) counts.set(exam.subject, current + 1);
+    }
+    return counts;
+  }, [filter]);
+
   const groups = useMemo(() => {
     const all = groupExams();
     return all
@@ -48,11 +64,6 @@ export default function Home() {
       }))
       .filter(g => g.years.length > 0);
   }, [filter, subjectFilter]);
-
-  const subjects = useMemo(
-    () => Array.from(new Set(exams.map(e => e.subject))).sort(),
-    []
-  );
 
   const startExam = () => {
     if (!selectTarget) return;
@@ -89,80 +100,92 @@ export default function Home() {
           <option value="真题">真题</option>
           <option value="模拟题">模拟题</option>
         </select>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 8, marginLeft: 12 }}>
-          科目:
-        </span>
-        <select
-          value={subjectFilter}
-          onChange={e => setSubjectFilter(e.target.value)}
-          style={{ padding: '6px 10px', borderRadius: 4, border: '1px solid var(--border)' }}
-        >
-          <option value="all">全部</option>
-          {subjects.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
       </div>
 
-      <div className="container">
-        {groups.length === 0 && (
-          <div className="empty-state">
-            <p>没有符合条件的考试</p>
-          </div>
-        )}
-        {groups.map(g => (
-          <div className="subject-group" key={g.subject}>
-            <div className="subject-title">{g.subject}</div>
-            {g.years.map(y => (
-              <div className="year-group" key={y.year}>
-                <div className="year-title">{y.year}</div>
-                <div className="exam-list">
-                  {y.items.map(exam => (
-                    <div className="exam-card" key={exam.id}>
-                      <div className="exam-title">
-                        <span className={`mode-badge ${exam.kind === '真题' ? 'real' : 'mock'}`}>
-                          {exam.kind}
-                        </span>
-                        {exam.title}
-                      </div>
-                      <div className="exam-meta">
-                        {availablePapers(exam).map(p => {
-                          let count = '';
-                          if (p === 'multi_choice') {
-                            count = `${exam.papers.multi_choice!.total}题`;
-                          } else if (p === 'case') {
-                            count = `${exam.papers.case!.cases.length}题`;
-                          } else {
-                            count = `${exam.papers.paper!.topics.length}题`;
-                          }
-                          return (
-                            <span key={p} style={{ marginRight: 10 }}>
-                              {paperLabel(p)}({count})
-                            </span>
-                          );
-                        })}
-                      </div>
-                      <div className="paper-btns">
-                        {availablePapers(exam).map(p => (
-                          <button
-                            key={p}
-                            className="paper-btn"
-                            onClick={() => {
-                              setSelectTarget({ exam, paperKind: p });
-                              setMode('exam');
-                            }}
-                          >
-                            进入 {paperLabel(p)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+      <div className="home-main-layout">
+        {/* 左侧科目导航栏 */}
+        <aside className="subject-sidebar">
+          <div className="sidebar-title">科目列表</div>
+          <nav className="subject-nav">
+            <button
+              className={`subject-nav-item ${subjectFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setSubjectFilter('all')}
+            >
+              <span className="subject-name">全部科目</span>
+              <span className="subject-count">{exams.filter(e => filter === 'all' || e.kind === filter).length}</span>
+            </button>
+            {subjects.map(s => (
+              <button
+                key={s}
+                className={`subject-nav-item ${subjectFilter === s ? 'active' : ''}`}
+                onClick={() => setSubjectFilter(s)}
+              >
+                <span className="subject-name">{s}</span>
+                <span className="subject-count">{subjectCounts.get(s) || 0}</span>
+              </button>
             ))}
-          </div>
-        ))}
+          </nav>
+        </aside>
+
+        {/* 右侧试卷列表 */}
+        <main className="exam-main-area">
+          {groups.length === 0 && (
+            <div className="empty-state">
+              <p>没有符合条件的考试</p>
+            </div>
+          )}
+          {groups.map(g => (
+            <div className="subject-section" key={g.subject}>
+              <h2 className="section-subject-title">{g.subject}</h2>
+              {g.years.map(y => (
+                <div className="year-section" key={y.year}>
+                  <h3 className="section-year-title">{y.year}</h3>
+                  <div className="exam-grid">
+                    {y.items.map(exam => (
+                      <div className="exam-card" key={exam.id}>
+                        <div className="exam-card-header">
+                          <span className={`mode-badge ${exam.kind === '真题' ? 'real' : 'mock'}`}>
+                            {exam.kind}
+                          </span>
+                          <div className="exam-title">{exam.title}</div>
+                        </div>
+                        <div className="exam-meta">
+                          {availablePapers(exam).map(p => {
+                            const count =
+                              p === 'multi_choice'
+                                ? `${exam.papers.multi_choice!.total}题`
+                                : p === 'case'
+                                ? `${exam.papers.case!.cases.length}题`
+                                : `${exam.papers.paper!.topics.length}题`;
+                            return (
+                              <span key={p} className="paper-info">
+                                {paperLabel(p)} · {count}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="paper-btns">
+                          {availablePapers(exam).map(p => (
+                            <button
+                              key={p}
+                              className="paper-btn"
+                              onClick={() => {
+                                setSelectTarget({ exam, paperKind: p });
+                                setMode('exam');
+                              }}
+                            >
+                              进入 {paperLabel(p)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </main>
       </div>
 
       {selectTarget && (
