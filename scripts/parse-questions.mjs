@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SOURCE_ROOT = path.resolve(__dirname, '../../awesome-ruankao');
+const SOURCE_ROOT = process.env.AWESOME_RUANKAO_PATH
+  ? path.resolve(process.env.AWESOME_RUANKAO_PATH)
+  : path.resolve(__dirname, '../../awesome-ruankao');
 const OUT_FILE = path.resolve(__dirname, '../src/data/exams.json');
 
 function walk(dir, out = []) {
