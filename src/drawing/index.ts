@@ -1,4 +1,4 @@
-export { default as DrawingEditor } from './DrawingEditor'
-export { default as SvgCanvas } from './SvgCanvas'
+export { default as DrawingEditor } from './ExcalidrawEditor'
+export { serializeDrawing, deserializeDrawing } from './ExcalidrawEditor'
 export * from './types'
 export * from './templates'

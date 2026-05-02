@@ -1,34 +1,52 @@
-import { useCallback, useState } from 'react'
-import type { DiagramTemplate, DrawingData, DrawTool } from './types'
-import { createEmptyDrawing, createTemplateDrawing, TEMPLATES } from './templates'
-import SvgCanvas from './SvgCanvas'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { DiagramTemplate, DrawingData } from './types'
+import { createEmptyDrawing, createTemplateDrawing, TEMPLATES, serializeDrawing, deserializeDrawing } from './templates'
 
 interface Props {
   /** Initial drawing data (for restoring saved state) */
   initialData?: DrawingData | null
-  /** Called whenever drawing changes */
+  /** Called whenever drawing is saved */
   onSave: (data: DrawingData) => void
   /** Called to close the editor */
   onClose: () => void
 }
 
-const TOOLS: { id: DrawTool; label: string; icon: string }[] = [
-  { id: 'select', label: '选择', icon: '↖' },
-  { id: 'rect', label: '矩形', icon: '▭' },
-  { id: 'ellipse', label: '椭圆', icon: '○' },
-  { id: 'diamond', label: '菱形', icon: '◇' },
-  { id: 'arrow', label: '箭头', icon: '→' },
-  { id: 'line', label: '线段', icon: '/' },
-  { id: 'text', label: '文字', icon: 'T' },
-]
+/**
+ * Lazy loader function for Excalidraw module
+ * Exported for testing purposes
+ */
+export const loadExcalidrawModule = () => import('@excalidraw/excalidraw')
 
-export default function DrawingEditor({ initialData, onSave, onClose }: Props) {
-  const [data, setData] = useState<DrawingData>(initialData || createEmptyDrawing())
-  const [activeTool, setActiveTool] = useState<DrawTool>('select')
+/**
+ * ExcalidrawEditor — Modal-based diagram editor using @excalidraw/excalidraw.
+ * Wraps Excalidraw with template selection and save/close controls.
+ */
+export default function ExcalidrawEditor({ initialData, onSave, onClose }: Props) {
+  const [data, setData] = useState<DrawingData>(initialData ?? createEmptyDrawing())
   const [showTemplates, setShowTemplates] = useState(!initialData)
+  const excalidrawRef = useRef<{ readyPromise?: Promise<unknown> }>(null)
+  const [ExcalidrawComponent, setExcalidrawComponent] = useState<React.ComponentType<Record<string, unknown>> | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleChange = useCallback((newData: DrawingData) => {
-    setData(newData)
+  // Lazy-load Excalidraw component
+  useEffect(() => {
+    loadExcalidrawModule()
+      .then((mod) => {
+        setExcalidrawComponent(() => mod.Excalidraw)
+        setIsLoading(false)
+      })
+      .catch((err: Error) => {
+        setLoadError(err.message)
+        setIsLoading(false)
+      })
+  }, [])
+
+  const handleChange = useCallback((elements: readonly Record<string, unknown>[]) => {
+    setData(prev => ({
+      ...prev,
+      elements: elements as unknown as DrawingData['elements'],
+    }))
   }, [])
 
   const handleSave = useCallback(() => {
@@ -45,29 +63,10 @@ export default function DrawingEditor({ initialData, onSave, onClose }: Props) {
     setShowTemplates(false)
   }, [])
 
-  const handleToolReset = useCallback(() => {
-    setActiveTool('select')
-  }, [])
-
   return (
     <div className="drawing-editor" data-testid="drawing-editor">
       {/* Toolbar */}
       <div className="drawing-toolbar" data-testid="drawing-toolbar">
-        <div className="drawing-tools">
-          {TOOLS.map(t => (
-            <button
-              key={t.id}
-              className={`drawing-tool-btn ${activeTool === t.id ? 'active' : ''}`}
-              onClick={() => setActiveTool(t.id)}
-              title={t.label}
-              data-testid={`tool-${t.id}`}
-            >
-              <span className="tool-icon">{t.icon}</span>
-              <span className="tool-label">{t.label}</span>
-            </button>
-          ))}
-        </div>
-
         <div className="drawing-actions">
           <button
             className="btn btn-sm"
@@ -125,6 +124,7 @@ export default function DrawingEditor({ initialData, onSave, onClose }: Props) {
               className="btn btn-sm"
               onClick={() => setShowTemplates(false)}
               style={{ marginTop: 12 }}
+              data-testid="btn-cancel-template"
             >
               取消
             </button>
@@ -132,20 +132,36 @@ export default function DrawingEditor({ initialData, onSave, onClose }: Props) {
         </div>
       )}
 
-      {/* Canvas */}
-      <SvgCanvas
-        data={data}
-        onChange={handleChange}
-        tool={activeTool}
-        onToolReset={handleToolReset}
-      />
+      {/* Excalidraw Canvas */}
+      <div className="drawing-canvas" data-testid="drawing-canvas" style={{ height: 450 }}>
+        {isLoading && (
+          <div className="drawing-loading" data-testid="drawing-loading">
+            加载绘图编辑器...
+          </div>
+        )}
+        {loadError && (
+          <div className="drawing-error" data-testid="drawing-error">
+            加载失败: {loadError}
+          </div>
+        )}
+        {ExcalidrawComponent && !loadError && (
+          <ExcalidrawComponent
+            ref={excalidrawRef}
+            initialData={{ elements: data.elements, appState: { viewBackgroundColor: '#ffffff' } }}
+            onChange={handleChange}
+            langCode="zh-CN"
+          />
+        )}
+      </div>
 
       {/* Status bar */}
-      <div className="drawing-status">
-        <span>图形数量: {data.shapes.length}</span>
-        <span>工具: {TOOLS.find(t => t.id === activeTool)?.label}</span>
-        <span style={{ fontSize: 11, color: '#999' }}>双击编辑标签 | Delete 删除 | 拖拽移动</span>
+      <div className="drawing-status" data-testid="drawing-status">
+        <span>图形数量: {data.elements.length}</span>
+        <span style={{ fontSize: 11, color: '#999' }}>使用工具栏绘图 | Ctrl+Z 撤销 | 拖拽移动</span>
       </div>
     </div>
   )
 }
+
+// Re-export serialization utilities for use by CaseExam
+export { serializeDrawing, deserializeDrawing }

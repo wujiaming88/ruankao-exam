@@ -1,4 +1,4 @@
-import type { DiagramTemplate, DrawingData, DrawShape, TemplateInfo } from './types'
+import type { DiagramTemplate, DrawingData, ExcalidrawElement, TemplateInfo } from './types'
 
 export const TEMPLATES: TemplateInfo[] = [
   { id: 'blank', name: '空白画布', description: '从零开始绘图' },
@@ -10,32 +10,262 @@ export const TEMPLATES: TemplateInfo[] = [
 ]
 
 let _counter = 0
-export function generateShapeId(): string {
-  return `s_${Date.now().toString(36)}_${(++_counter).toString(36)}`
+
+export function generateId(): string {
+  return `elem_${Date.now().toString(36)}_${(++_counter).toString(36)}`
+}
+
+/** Reset counter for testing determinism */
+export function resetIdCounter(): void {
+  _counter = 0
 }
 
 export function createEmptyDrawing(): DrawingData {
-  return { shapes: [], width: 800, height: 500, version: 1 }
+  return { elements: [], version: 1 }
 }
 
-function makeRect(id: string, x: number, y: number, w: number, h: number, label: string): DrawShape {
-  return { id, kind: 'rect', x, y, width: w, height: h, label, strokeColor: '#333', fillColor: '#fff' }
+function makeRect(id: string, x: number, y: number, w: number, h: number, text?: string): ExcalidrawElement[] {
+  const rect: ExcalidrawElement = {
+    id,
+    type: 'rectangle',
+    x,
+    y,
+    width: w,
+    height: h,
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 2,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    roundness: { type: 3 },
+    isDeleted: false,
+    boundElements: text ? [{ id: `${id}_text`, type: 'text' }] : [],
+  }
+  if (!text) return [rect]
+  const textEl: ExcalidrawElement = {
+    id: `${id}_text`,
+    type: 'text',
+    x: x + 10,
+    y: y + h / 2 - 10,
+    width: w - 20,
+    height: 20,
+    text,
+    fontSize: 16,
+    fontFamily: 1,
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 1,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    containerId: id,
+    boundElements: [],
+  }
+  return [rect, textEl]
 }
 
-function makeEllipse(id: string, x: number, y: number, rx: number, ry: number, label: string): DrawShape {
-  return { id, kind: 'ellipse', x, y, rx, ry, label, strokeColor: '#333', fillColor: '#fff' }
+function makeEllipse(id: string, x: number, y: number, w: number, h: number, text?: string): ExcalidrawElement[] {
+  const ellipse: ExcalidrawElement = {
+    id,
+    type: 'ellipse',
+    x,
+    y,
+    width: w,
+    height: h,
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 2,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    roundness: { type: 2 },
+    isDeleted: false,
+    boundElements: text ? [{ id: `${id}_text`, type: 'text' }] : [],
+  }
+  if (!text) return [ellipse]
+  const textEl: ExcalidrawElement = {
+    id: `${id}_text`,
+    type: 'text',
+    x: x + 10,
+    y: y + h / 2 - 10,
+    width: w - 20,
+    height: 20,
+    text,
+    fontSize: 14,
+    fontFamily: 1,
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 1,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    containerId: id,
+    boundElements: [],
+  }
+  return [ellipse, textEl]
 }
 
-function makeDiamond(id: string, x: number, y: number, w: number, h: number, label: string): DrawShape {
-  return { id, kind: 'diamond', x, y, width: w, height: h, label, strokeColor: '#333', fillColor: '#fff' }
+function makeDiamond(id: string, x: number, y: number, w: number, h: number, text?: string): ExcalidrawElement[] {
+  const diamond: ExcalidrawElement = {
+    id,
+    type: 'diamond',
+    x,
+    y,
+    width: w,
+    height: h,
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 2,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    roundness: { type: 2 },
+    isDeleted: false,
+    boundElements: text ? [{ id: `${id}_text`, type: 'text' }] : [],
+  }
+  if (!text) return [diamond]
+  const textEl: ExcalidrawElement = {
+    id: `${id}_text`,
+    type: 'text',
+    x: x + 10,
+    y: y + h / 2 - 10,
+    width: w - 20,
+    height: 20,
+    text,
+    fontSize: 14,
+    fontFamily: 1,
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 1,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    containerId: id,
+    boundElements: [],
+  }
+  return [diamond, textEl]
 }
 
-function makeArrow(id: string, x: number, y: number, x2: number, y2: number, label: string): DrawShape {
-  return { id, kind: 'arrow', x, y, x2, y2, label, strokeColor: '#333', fillColor: 'transparent' }
+function makeArrow(id: string, x1: number, y1: number, x2: number, y2: number, label?: string): ExcalidrawElement[] {
+  const arrow: ExcalidrawElement = {
+    id,
+    type: 'arrow',
+    x: x1,
+    y: y1,
+    width: x2 - x1,
+    height: y2 - y1,
+    points: [[0, 0], [x2 - x1, y2 - y1]],
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 2,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    boundElements: label ? [{ id: `${id}_text`, type: 'text' }] : [],
+    endArrowhead: 'arrow',
+    startArrowhead: null,
+  }
+  if (!label) return [arrow]
+  const midX = x1 + (x2 - x1) / 2
+  const midY = y1 + (y2 - y1) / 2
+  const textEl: ExcalidrawElement = {
+    id: `${id}_text`,
+    type: 'text',
+    x: midX - 20,
+    y: midY - 10,
+    width: 40,
+    height: 20,
+    text: label,
+    fontSize: 14,
+    fontFamily: 1,
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 1,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    containerId: id,
+    boundElements: [],
+  }
+  return [arrow, textEl]
 }
 
-function makeText(id: string, x: number, y: number, label: string): DrawShape {
-  return { id, kind: 'text', x, y, label, strokeColor: '#333', fillColor: 'transparent', fontSize: 14 }
+function makeText(id: string, x: number, y: number, text: string, fontSize: number = 20): ExcalidrawElement[] {
+  return [{
+    id,
+    type: 'text',
+    x,
+    y,
+    width: text.length * fontSize * 0.6,
+    height: fontSize + 4,
+    text,
+    fontSize,
+    fontFamily: 1,
+    textAlign: 'left',
+    verticalAlign: 'top',
+    strokeColor: '#1e1e1e',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 1,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    boundElements: [],
+  }]
+}
+
+function makeLine(id: string, x1: number, y1: number, x2: number, y2: number): ExcalidrawElement[] {
+  return [{
+    id,
+    type: 'line',
+    x: x1,
+    y: y1,
+    width: x2 - x1,
+    height: y2 - y1,
+    points: [[0, 0], [x2 - x1, y2 - y1]],
+    strokeColor: '#999999',
+    backgroundColor: 'transparent',
+    fillStyle: 'solid',
+    strokeWidth: 1,
+    roughness: 1,
+    opacity: 100,
+    angle: 0,
+    groupIds: [],
+    isDeleted: false,
+    boundElements: [],
+  }]
 }
 
 export function createTemplateDrawing(template: DiagramTemplate): DrawingData {
@@ -46,87 +276,80 @@ export function createTemplateDrawing(template: DiagramTemplate): DrawingData {
       break
 
     case 'aon': {
-      // AON: nodes are activities (rectangles), arrows show dependencies
-      drawing.shapes = [
-        makeRect('aon_1', 50, 200, 100, 60, '活动A\nES=0 EF=3'),
-        makeRect('aon_2', 250, 100, 100, 60, '活动B\nES=3 EF=6'),
-        makeRect('aon_3', 250, 300, 100, 60, '活动C\nES=3 EF=8'),
-        makeRect('aon_4', 500, 200, 100, 60, '活动D\nES=8 EF=11'),
-        makeArrow('aon_a1', 150, 230, 250, 130, ''),
-        makeArrow('aon_a2', 150, 230, 250, 330, ''),
-        makeArrow('aon_a3', 350, 130, 500, 230, ''),
-        makeArrow('aon_a4', 350, 330, 500, 230, ''),
-        makeText('aon_t', 250, 30, '单代号网络图 (AON)'),
+      drawing.elements = [
+        ...makeText('aon_title', 220, 10, '单代号网络图 (AON)'),
+        ...makeRect('aon_1', 50, 180, 120, 60, '活动A\nES=0 EF=3'),
+        ...makeRect('aon_2', 250, 80, 120, 60, '活动B\nES=3 EF=6'),
+        ...makeRect('aon_3', 250, 280, 120, 60, '活动C\nES=3 EF=8'),
+        ...makeRect('aon_4', 480, 180, 120, 60, '活动D\nES=8 EF=11'),
+        ...makeArrow('aon_a1', 170, 210, 250, 110),
+        ...makeArrow('aon_a2', 170, 210, 250, 310),
+        ...makeArrow('aon_a3', 370, 110, 480, 210),
+        ...makeArrow('aon_a4', 370, 310, 480, 210),
       ]
       break
     }
 
     case 'aoa': {
-      // AOA: nodes are events (circles), arrows are activities
-      drawing.shapes = [
-        makeEllipse('aoa_1', 80, 220, 30, 30, '①'),
-        makeEllipse('aoa_2', 280, 100, 30, 30, '②'),
-        makeEllipse('aoa_3', 280, 340, 30, 30, '③'),
-        makeEllipse('aoa_4', 520, 220, 30, 30, '④'),
-        makeArrow('aoa_a1', 110, 220, 250, 100, 'A(3)'),
-        makeArrow('aoa_a2', 110, 220, 250, 340, 'B(5)'),
-        makeArrow('aoa_a3', 310, 100, 490, 220, 'C(4)'),
-        makeArrow('aoa_a4', 310, 340, 490, 220, 'D(2)'),
-        makeText('aoa_t', 250, 30, '双代号网络图 (AOA)'),
+      drawing.elements = [
+        ...makeText('aoa_title', 220, 10, '双代号网络图 (AOA)'),
+        ...makeEllipse('aoa_1', 60, 190, 60, 60, '①'),
+        ...makeEllipse('aoa_2', 250, 70, 60, 60, '②'),
+        ...makeEllipse('aoa_3', 250, 310, 60, 60, '③'),
+        ...makeEllipse('aoa_4', 480, 190, 60, 60, '④'),
+        ...makeArrow('aoa_a1', 120, 220, 250, 100, 'A(3)'),
+        ...makeArrow('aoa_a2', 120, 220, 250, 340, 'B(5)'),
+        ...makeArrow('aoa_a3', 310, 100, 480, 220, 'C(4)'),
+        ...makeArrow('aoa_a4', 310, 340, 480, 220, 'D(2)'),
       ]
       break
     }
 
     case 'class': {
-      // UML Class diagram
-      drawing.shapes = [
-        makeRect('cls_1', 100, 50, 160, 100, '<<interface>>\nAnimal\n+eat(): void\n+sleep(): void'),
-        makeRect('cls_2', 50, 250, 140, 80, 'Dog\n-name: string\n+bark(): void'),
-        makeRect('cls_3', 250, 250, 140, 80, 'Cat\n-name: string\n+meow(): void'),
-        makeArrow('cls_a1', 120, 250, 180, 150, '实现'),
-        makeArrow('cls_a2', 320, 250, 200, 150, '实现'),
-        makeText('cls_t', 150, 10, 'UML 类图'),
+      drawing.elements = [
+        ...makeText('cls_title', 150, 10, 'UML 类图'),
+        ...makeRect('cls_1', 120, 50, 180, 100, '<<interface>>\nAnimal\n+eat(): void\n+sleep(): void'),
+        ...makeRect('cls_2', 50, 250, 150, 80, 'Dog\n-name: string\n+bark(): void'),
+        ...makeRect('cls_3', 270, 250, 150, 80, 'Cat\n-name: string\n+meow(): void'),
+        ...makeArrow('cls_a1', 125, 250, 210, 150, '实现'),
+        ...makeArrow('cls_a2', 345, 250, 210, 150, '实现'),
       ]
       break
     }
 
     case 'sequence': {
-      // UML Sequence diagram
-      drawing.shapes = [
-        makeRect('seq_1', 50, 30, 80, 40, '客户端'),
-        makeRect('seq_2', 250, 30, 80, 40, '服务器'),
-        makeRect('seq_3', 450, 30, 80, 40, '数据库'),
-        // Lifelines (vertical lines)
-        { id: 'seq_l1', kind: 'line', x: 90, y: 70, x2: 90, y2: 400, label: '', strokeColor: '#999', fillColor: 'transparent' },
-        { id: 'seq_l2', kind: 'line', x: 290, y: 70, x2: 290, y2: 400, label: '', strokeColor: '#999', fillColor: 'transparent' },
-        { id: 'seq_l3', kind: 'line', x: 490, y: 70, x2: 490, y2: 400, label: '', strokeColor: '#999', fillColor: 'transparent' },
-        // Messages
-        makeArrow('seq_m1', 90, 120, 290, 120, '1. 请求'),
-        makeArrow('seq_m2', 290, 180, 490, 180, '2. 查询'),
-        makeArrow('seq_m3', 490, 240, 290, 240, '3. 返回数据'),
-        makeArrow('seq_m4', 290, 300, 90, 300, '4. 响应'),
-        makeText('seq_t', 200, 10, 'UML 时序图'),
+      drawing.elements = [
+        ...makeText('seq_title', 200, 10, 'UML 时序图'),
+        ...makeRect('seq_1', 60, 40, 80, 40, '客户端'),
+        ...makeRect('seq_2', 260, 40, 80, 40, '服务器'),
+        ...makeRect('seq_3', 460, 40, 80, 40, '数据库'),
+        ...makeLine('seq_l1', 100, 80, 100, 400),
+        ...makeLine('seq_l2', 300, 80, 300, 400),
+        ...makeLine('seq_l3', 500, 80, 500, 400),
+        ...makeArrow('seq_m1', 100, 130, 300, 130, '1. 请求'),
+        ...makeArrow('seq_m2', 300, 200, 500, 200, '2. 查询'),
+        ...makeArrow('seq_m3', 500, 270, 300, 270, '3. 返回数据'),
+        ...makeArrow('seq_m4', 300, 340, 100, 340, '4. 响应'),
       ]
       break
     }
 
     case 'er': {
-      // ER diagram: entities (rects), relationships (diamonds), attributes (ellipses)
-      drawing.shapes = [
-        makeRect('er_1', 50, 180, 120, 60, '学生'),
-        makeRect('er_2', 500, 180, 120, 60, '课程'),
-        makeDiamond('er_d1', 300, 185, 80, 50, '选课'),
-        makeEllipse('er_a1', 80, 80, 40, 25, '学号'),
-        makeEllipse('er_a2', 170, 80, 40, 25, '姓名'),
-        makeEllipse('er_a3', 530, 80, 40, 25, '课程号'),
-        makeEllipse('er_a4', 620, 80, 40, 25, '课程名'),
-        makeArrow('er_l1', 170, 180, 300, 210, '1'),
-        makeArrow('er_l2', 380, 210, 500, 210, 'N'),
-        { id: 'er_la1', kind: 'line', x: 80, y: 105, x2: 80, y2: 180, label: '', strokeColor: '#333', fillColor: 'transparent' },
-        { id: 'er_la2', kind: 'line', x: 170, y: 105, x2: 140, y2: 180, label: '', strokeColor: '#333', fillColor: 'transparent' },
-        { id: 'er_la3', kind: 'line', x: 530, y: 105, x2: 530, y2: 180, label: '', strokeColor: '#333', fillColor: 'transparent' },
-        { id: 'er_la4', kind: 'line', x: 620, y: 105, x2: 590, y2: 180, label: '', strokeColor: '#333', fillColor: 'transparent' },
-        makeText('er_t', 260, 20, 'ER 图'),
+      drawing.elements = [
+        ...makeText('er_title', 250, 10, 'ER 图'),
+        ...makeRect('er_1', 50, 180, 130, 60, '学生'),
+        ...makeRect('er_2', 480, 180, 130, 60, '课程'),
+        ...makeDiamond('er_d1', 280, 180, 100, 60, '选课'),
+        ...makeEllipse('er_a1', 50, 70, 80, 50, '学号'),
+        ...makeEllipse('er_a2', 160, 70, 80, 50, '姓名'),
+        ...makeEllipse('er_a3', 480, 70, 80, 50, '课程号'),
+        ...makeEllipse('er_a4', 590, 70, 80, 50, '课程名'),
+        ...makeArrow('er_l1', 180, 180, 280, 210, '1'),
+        ...makeArrow('er_l2', 380, 210, 480, 210, 'N'),
+        ...makeLine('er_la1', 90, 120, 90, 180),
+        ...makeLine('er_la2', 200, 120, 130, 180),
+        ...makeLine('er_la3', 520, 120, 520, 180),
+        ...makeLine('er_la4', 630, 120, 580, 180),
       ]
       break
     }
@@ -142,7 +365,7 @@ export function serializeDrawing(data: DrawingData): string {
 export function deserializeDrawing(json: string): DrawingData | null {
   try {
     const parsed = JSON.parse(json)
-    if (parsed && Array.isArray(parsed.shapes) && typeof parsed.version === 'number') {
+    if (parsed && Array.isArray(parsed.elements) && typeof parsed.version === 'number') {
       return parsed as DrawingData
     }
     return null

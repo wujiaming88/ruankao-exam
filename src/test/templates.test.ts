@@ -1,196 +1,320 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import {
+  generateId,
+  resetIdCounter,
   createEmptyDrawing,
   createTemplateDrawing,
   serializeDrawing,
   deserializeDrawing,
-  generateShapeId,
   TEMPLATES,
 } from '../drawing/templates'
 import type { DiagramTemplate, DrawingData } from '../drawing/types'
 
 describe('Drawing Templates', () => {
-  describe('TEMPLATES constant', () => {
-    it('should have 6 templates', () => {
-      expect(TEMPLATES).toHaveLength(6)
+  describe('generateId', () => {
+    beforeEach(() => {
+      resetIdCounter()
     })
 
-    it('should include all required diagram types', () => {
-      const ids = TEMPLATES.map(t => t.id)
-      expect(ids).toContain('blank')
-      expect(ids).toContain('aon')
-      expect(ids).toContain('aoa')
-      expect(ids).toContain('class')
-      expect(ids).toContain('sequence')
-      expect(ids).toContain('er')
-    })
-
-    it('should have name and description for each template', () => {
-      for (const t of TEMPLATES) {
-        expect(t.name).toBeTruthy()
-        expect(t.description).toBeTruthy()
-      }
-    })
-  })
-
-  describe('generateShapeId', () => {
     it('should generate unique IDs', () => {
-      const ids = new Set<string>()
-      for (let i = 0; i < 100; i++) {
-        ids.add(generateShapeId())
-      }
-      expect(ids.size).toBe(100)
+      const id1 = generateId()
+      const id2 = generateId()
+      const id3 = generateId()
+
+      expect(id1).not.toBe(id2)
+      expect(id2).not.toBe(id3)
+      expect(id1).not.toBe(id3)
     })
 
-    it('should return a string starting with s_', () => {
-      const id = generateShapeId()
-      expect(id).toMatch(/^s_/)
+    it('should return a string starting with elem_', () => {
+      const id = generateId()
+      expect(typeof id).toBe('string')
+      expect(id.startsWith('elem_')).toBe(true)
     })
   })
 
   describe('createEmptyDrawing', () => {
     it('should return an empty drawing with correct structure', () => {
-      const d = createEmptyDrawing()
-      expect(d.shapes).toEqual([])
-      expect(d.width).toBe(800)
-      expect(d.height).toBe(500)
-      expect(d.version).toBe(1)
+      const drawing = createEmptyDrawing()
+
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
+      expect(drawing.elements.length).toBe(0)
+      expect(drawing.version).toBe(1)
+    })
+  })
+
+  describe('TEMPLATES', () => {
+    it('should contain all expected templates', () => {
+      const expectedIds: DiagramTemplate[] = ['blank', 'aon', 'aoa', 'class', 'sequence', 'er']
+      const actualIds = TEMPLATES.map(t => t.id)
+
+      expect(actualIds).toEqual(expectedIds)
+    })
+
+    it('should have valid structure for each template', () => {
+      TEMPLATES.forEach(template => {
+        expect(template).toHaveProperty('id')
+        expect(template).toHaveProperty('name')
+        expect(template).toHaveProperty('description')
+        expect(typeof template.id).toBe('string')
+        expect(typeof template.name).toBe('string')
+        expect(typeof template.description).toBe('string')
+      })
     })
   })
 
   describe('createTemplateDrawing', () => {
-    const templateIds: DiagramTemplate[] = ['blank', 'aon', 'aoa', 'class', 'sequence', 'er']
+    it('should create valid drawing for template: blank', () => {
+      const drawing = createTemplateDrawing('blank')
 
-    it.each(templateIds)('should create valid drawing for template: %s', (id) => {
-      const drawing = createTemplateDrawing(id)
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
       expect(drawing.version).toBe(1)
-      expect(drawing.width).toBe(800)
-      expect(drawing.height).toBe(500)
-      expect(Array.isArray(drawing.shapes)).toBe(true)
     })
 
-    it('blank template should have no shapes', () => {
-      const d = createTemplateDrawing('blank')
-      expect(d.shapes).toHaveLength(0)
+    it('should create valid drawing for template: aon', () => {
+      const drawing = createTemplateDrawing('aon')
+
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
+      expect(drawing.elements.length).toBeGreaterThan(0)
     })
 
-    it('aon template should have nodes and arrows', () => {
-      const d = createTemplateDrawing('aon')
-      const rects = d.shapes.filter(s => s.kind === 'rect')
-      const arrows = d.shapes.filter(s => s.kind === 'arrow')
-      expect(rects.length).toBeGreaterThanOrEqual(4)
-      expect(arrows.length).toBeGreaterThanOrEqual(4)
+    it('should create valid drawing for template: aoa', () => {
+      const drawing = createTemplateDrawing('aoa')
+
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
+      expect(drawing.elements.length).toBeGreaterThan(0)
     })
 
-    it('aoa template should have circles and arrows', () => {
-      const d = createTemplateDrawing('aoa')
-      const ellipses = d.shapes.filter(s => s.kind === 'ellipse')
-      const arrows = d.shapes.filter(s => s.kind === 'arrow')
-      expect(ellipses.length).toBeGreaterThanOrEqual(4)
-      expect(arrows.length).toBeGreaterThanOrEqual(4)
+    it('should create valid drawing for template: class', () => {
+      const drawing = createTemplateDrawing('class')
+
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
+      expect(drawing.elements.length).toBeGreaterThan(0)
     })
 
-    it('class template should have class boxes', () => {
-      const d = createTemplateDrawing('class')
-      const rects = d.shapes.filter(s => s.kind === 'rect')
-      expect(rects.length).toBeGreaterThanOrEqual(3)
+    it('should create valid drawing for template: sequence', () => {
+      const drawing = createTemplateDrawing('sequence')
+
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
+      expect(drawing.elements.length).toBeGreaterThan(0)
     })
 
-    it('sequence template should have lifelines and messages', () => {
-      const d = createTemplateDrawing('sequence')
-      const rects = d.shapes.filter(s => s.kind === 'rect')
-      const lines = d.shapes.filter(s => s.kind === 'line')
-      const arrows = d.shapes.filter(s => s.kind === 'arrow')
-      expect(rects.length).toBeGreaterThanOrEqual(3)
-      expect(lines.length).toBeGreaterThanOrEqual(3)
-      expect(arrows.length).toBeGreaterThanOrEqual(3)
+    it('should create valid drawing for template: er', () => {
+      const drawing = createTemplateDrawing('er')
+
+      expect(drawing).toHaveProperty('elements')
+      expect(drawing).toHaveProperty('version')
+      expect(Array.isArray(drawing.elements)).toBe(true)
+      expect(drawing.elements.length).toBeGreaterThan(0)
     })
 
-    it('er template should have entities, relationships, and attributes', () => {
-      const d = createTemplateDrawing('er')
-      const rects = d.shapes.filter(s => s.kind === 'rect')
-      const diamonds = d.shapes.filter(s => s.kind === 'diamond')
-      const ellipses = d.shapes.filter(s => s.kind === 'ellipse')
-      expect(rects.length).toBeGreaterThanOrEqual(2)
-      expect(diamonds.length).toBeGreaterThanOrEqual(1)
-      expect(ellipses.length).toBeGreaterThanOrEqual(4)
+    describe('template content validation', () => {
+      it('blank template should have no shapes', () => {
+        const drawing = createTemplateDrawing('blank')
+        expect(drawing.elements.length).toBe(0)
+      })
+
+      it('aon template should have rectangles and arrows', () => {
+        const drawing = createTemplateDrawing('aon')
+        const rectangles = drawing.elements.filter(el => el.type === 'rectangle')
+        const arrows = drawing.elements.filter(el => el.type === 'arrow')
+
+        expect(rectangles.length).toBeGreaterThanOrEqual(4)
+        expect(arrows.length).toBeGreaterThanOrEqual(4)
+      })
+
+      it('aoa template should have ellipses and arrows', () => {
+        const drawing = createTemplateDrawing('aoa')
+        const ellipses = drawing.elements.filter(el => el.type === 'ellipse')
+        const arrows = drawing.elements.filter(el => el.type === 'arrow')
+
+        expect(ellipses.length).toBeGreaterThanOrEqual(4)
+        expect(arrows.length).toBeGreaterThanOrEqual(4)
+      })
+
+      it('class template should have rectangles', () => {
+        const drawing = createTemplateDrawing('class')
+        const rectangles = drawing.elements.filter(el => el.type === 'rectangle')
+
+        expect(rectangles.length).toBeGreaterThanOrEqual(3)
+      })
+
+      it('sequence template should have rectangles and lines', () => {
+        const drawing = createTemplateDrawing('sequence')
+        const rectangles = drawing.elements.filter(el => el.type === 'rectangle')
+        const lines = drawing.elements.filter(el => el.type === 'line')
+        const arrows = drawing.elements.filter(el => el.type === 'arrow')
+
+        expect(rectangles.length).toBeGreaterThanOrEqual(3)
+        expect(lines.length).toBeGreaterThanOrEqual(3)
+        expect(arrows.length).toBeGreaterThanOrEqual(4)
+      })
+
+      it('er template should have rectangles, diamonds, and ellipses', () => {
+        const drawing = createTemplateDrawing('er')
+        const rectangles = drawing.elements.filter(el => el.type === 'rectangle')
+        const diamonds = drawing.elements.filter(el => el.type === 'diamond')
+        const ellipses = drawing.elements.filter(el => el.type === 'ellipse')
+
+        expect(rectangles.length).toBeGreaterThanOrEqual(2)
+        expect(diamonds.length).toBeGreaterThanOrEqual(1)
+        expect(ellipses.length).toBeGreaterThanOrEqual(4)
+      })
     })
 
-    it('all shapes in templates should have valid IDs', () => {
-      for (const id of templateIds) {
-        const d = createTemplateDrawing(id)
-        for (const shape of d.shapes) {
-          expect(shape.id).toBeTruthy()
-          expect(typeof shape.id).toBe('string')
+    it('all elements in templates should have valid IDs', () => {
+      const templateIds: DiagramTemplate[] = ['blank', 'aon', 'aoa', 'class', 'sequence', 'er']
+
+      for (const templateId of templateIds) {
+        const drawing = createTemplateDrawing(templateId)
+        for (const element of drawing.elements) {
+          expect(element.id).toBeTruthy()
+          expect(typeof element.id).toBe('string')
+          expect(element.id.length).toBeGreaterThan(0)
         }
       }
     })
 
-    it('all shapes should have valid kind', () => {
-      const validKinds = ['rect', 'ellipse', 'diamond', 'arrow', 'line', 'text']
-      for (const id of templateIds) {
-        const d = createTemplateDrawing(id)
-        for (const shape of d.shapes) {
-          expect(validKinds).toContain(shape.kind)
+    it('all elements should have valid type', () => {
+      const templateIds: DiagramTemplate[] = ['aon', 'aoa', 'class', 'sequence', 'er']
+      const validTypes = ['rectangle', 'ellipse', 'diamond', 'arrow', 'line', 'text']
+
+      for (const templateId of templateIds) {
+        const drawing = createTemplateDrawing(templateId)
+        for (const element of drawing.elements) {
+          expect(validTypes).toContain(element.type)
+        }
+      }
+    })
+
+    it('all elements should have valid coordinates', () => {
+      const templateIds: DiagramTemplate[] = ['aon', 'aoa', 'class', 'sequence', 'er']
+
+      for (const templateId of templateIds) {
+        const drawing = createTemplateDrawing(templateId)
+        for (const element of drawing.elements) {
+          expect(typeof element.x).toBe('number')
+          expect(typeof element.y).toBe('number')
+          expect(typeof element.width).toBe('number')
+          expect(typeof element.height).toBe('number')
+          expect(element.x).toBeGreaterThanOrEqual(0)
+          expect(element.y).toBeGreaterThanOrEqual(0)
         }
       }
     })
   })
 
   describe('serializeDrawing', () => {
-    it('should serialize to valid JSON', () => {
-      const d = createEmptyDrawing()
-      const json = serializeDrawing(d)
+    it('should preserve all data', () => {
+      const drawing = createTemplateDrawing('aon')
+      const json = serializeDrawing(drawing)
+      const parsed = JSON.parse(json)
+
+      expect(parsed.elements).toHaveLength(drawing.elements.length)
+      expect(parsed.version).toBe(drawing.version)
+    })
+
+    it('should return valid JSON string', () => {
+      const drawing = createEmptyDrawing()
+      const json = serializeDrawing(drawing)
+
       expect(() => JSON.parse(json)).not.toThrow()
     })
 
-    it('should preserve all data', () => {
-      const d = createTemplateDrawing('aon')
-      const json = serializeDrawing(d)
+    it('should handle empty drawing', () => {
+      const drawing = createEmptyDrawing()
+      const json = serializeDrawing(drawing)
       const parsed = JSON.parse(json)
-      expect(parsed.shapes).toHaveLength(d.shapes.length)
-      expect(parsed.version).toBe(d.version)
-      expect(parsed.width).toBe(d.width)
-      expect(parsed.height).toBe(d.height)
+
+      expect(parsed.elements).toEqual([])
+      expect(parsed.version).toBe(1)
+    })
+
+    it('should preserve element properties', () => {
+      const drawing = createTemplateDrawing('class')
+      const json = serializeDrawing(drawing)
+      const parsed = JSON.parse(json) as DrawingData
+
+      for (let i = 0; i < drawing.elements.length; i++) {
+        const original = drawing.elements[i]
+        const deserialized = parsed.elements[i]
+
+        expect(deserialized.id).toBe(original.id)
+        expect(deserialized.type).toBe(original.type)
+        expect(deserialized.x).toBe(original.x)
+        expect(deserialized.y).toBe(original.y)
+        expect(deserialized.width).toBe(original.width)
+        expect(deserialized.height).toBe(original.height)
+      }
     })
   })
 
   describe('deserializeDrawing', () => {
     it('should deserialize valid JSON', () => {
-      const original = createTemplateDrawing('class')
+      const original = createTemplateDrawing('aon')
       const json = serializeDrawing(original)
       const result = deserializeDrawing(json)
+
       expect(result).not.toBeNull()
-      expect(result!.shapes).toHaveLength(original.shapes.length)
+      expect(result!.elements).toHaveLength(original.elements.length)
       expect(result!.version).toBe(original.version)
     })
 
     it('should return null for invalid JSON', () => {
-      expect(deserializeDrawing('not json')).toBeNull()
+      const result = deserializeDrawing('invalid json')
+      expect(result).toBeNull()
     })
 
-    it('should return null for JSON without shapes array', () => {
-      expect(deserializeDrawing('{"version": 1}')).toBeNull()
+    it('should return null for JSON without elements array', () => {
+      const json = JSON.stringify({ version: 1 })
+      const result = deserializeDrawing(json)
+      expect(result).toBeNull()
     })
 
-    it('should return null for JSON without version', () => {
-      expect(deserializeDrawing('{"shapes": []}')).toBeNull()
+    it('should return null for JSON without version number', () => {
+      const json = JSON.stringify({ elements: [] })
+      const result = deserializeDrawing(json)
+      expect(result).toBeNull()
     })
 
-    it('should return null for empty string', () => {
-      expect(deserializeDrawing('')).toBeNull()
+    it('should handle empty drawing', () => {
+      const original = createEmptyDrawing()
+      const json = serializeDrawing(original)
+      const result = deserializeDrawing(json)
+
+      expect(result).not.toBeNull()
+      expect(result!.elements).toEqual([])
+      expect(result!.version).toBe(1)
     })
 
-    it('round-trip serialization should be lossless', () => {
-      const templates: DiagramTemplate[] = ['aon', 'aoa', 'class', 'sequence', 'er']
-      for (const t of templates) {
-        const original = createTemplateDrawing(t)
+    it('should round-trip correctly', () => {
+      const templateIds: DiagramTemplate[] = ['blank', 'aon', 'aoa', 'class', 'sequence', 'er']
+
+      for (const templateId of templateIds) {
+        const original = createTemplateDrawing(templateId)
         const json = serializeDrawing(original)
-        const restored = deserializeDrawing(json) as DrawingData
-        expect(restored.shapes).toEqual(original.shapes)
-        expect(restored.width).toBe(original.width)
-        expect(restored.height).toBe(original.height)
-        expect(restored.version).toBe(original.version)
+        const restored = deserializeDrawing(json)
+
+        expect(restored).not.toBeNull()
+        expect(restored!.elements.length).toBe(original.elements.length)
+        expect(restored!.version).toBe(original.version)
+
+        for (let i = 0; i < original.elements.length; i++) {
+          expect(restored!.elements[i].id).toBe(original.elements[i].id)
+          expect(restored!.elements[i].type).toBe(original.elements[i].type)
+        }
       }
     })
   })

@@ -1,116 +1,79 @@
-/* Drawing Editor Styles */
 .drawing-editor {
-  position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border, #e0e0e0);
-  border-radius: 6px;
-  background: #fff;
-  overflow: hidden;
+  width: 100%;
 }
 
 .drawing-toolbar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--border, #e0e0e0);
-  background: #f8f9fa;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.drawing-tools {
-  display: flex;
-  gap: 2px;
-}
-
-.drawing-tool-btn {
-  display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.15s;
-}
-
-.drawing-tool-btn:hover {
-  background: #e9ecef;
-}
-
-.drawing-tool-btn.active {
-  background: #e3f2fd;
-  border-color: #2196F3;
-  color: #1565C0;
-}
-
-.tool-icon {
-  font-size: 14px;
-}
-
-.tool-label {
-  font-size: 11px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e1e4e8;
+  border-radius: 6px 6px 0 0;
 }
 
 .drawing-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 
-.btn-sm {
-  padding: 3px 8px !important;
-  font-size: 12px !important;
-}
-
-.drawing-canvas-container {
+.drawing-canvas {
   position: relative;
-  overflow: auto;
-  flex: 1;
-  min-height: 400px;
+  border: 1px solid #e1e4e8;
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
 }
 
-.drawing-svg {
-  display: block;
+.drawing-loading,
+.drawing-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 14px;
+}
+
+.drawing-error {
+  color: #d32f2f;
 }
 
 .drawing-status {
   display: flex;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
   padding: 4px 12px;
-  font-size: 11px;
+  font-size: 12px;
   color: #666;
-  border-top: 1px solid var(--border, #e0e0e0);
   background: #fafbfc;
+  border-top: 1px solid #e1e4e8;
 }
 
-/* Template modal */
 .drawing-templates-overlay {
   position: absolute;
   inset: 0;
-  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
+  z-index: 100;
 }
 
 .drawing-templates-panel {
-  background: #fff;
+  background: white;
   border-radius: 8px;
-  padding: 20px;
+  padding: 24px;
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .drawing-templates-panel h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-size: 18px;
 }
 
 .template-grid {
@@ -121,74 +84,51 @@
 
 .template-card {
   padding: 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e1e4e8;
   border-radius: 6px;
-  background: #fff;
+  background: white;
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .template-card:hover {
-  border-color: #2196F3;
-  background: #e3f2fd;
+  border-color: #0366d6;
+  box-shadow: 0 2px 8px rgba(3, 102, 214, 0.1);
 }
 
 .template-name {
-  font-size: 13px;
   font-weight: 600;
+  font-size: 14px;
   margin-bottom: 4px;
 }
 
 .template-desc {
-  font-size: 11px;
+  font-size: 12px;
   color: #666;
 }
 
-/* Label editor */
-.label-editor input {
-  border: 1px solid #2196F3;
-  border-radius: 3px;
-  outline: none;
-}
-
-/* Insert drawing button in case exam */
 .insert-drawing-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  display: inline-block;
   padding: 4px 10px;
-  font-size: 12px;
-  border: 1px dashed #999;
+  font-size: 13px;
+  color: #0366d6;
+  background: #f1f8ff;
+  border: 1px solid #c8e1ff;
   border-radius: 4px;
-  background: #f8f9fa;
   cursor: pointer;
-  color: #555;
-  transition: all 0.15s;
+  transition: background 0.2s;
 }
 
 .insert-drawing-btn:hover {
-  border-color: #2196F3;
-  color: #1565C0;
-  background: #e3f2fd;
+  background: #dbedff;
 }
 
 .drawing-thumbnail {
-  border: 1px solid #e0e0e0;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
   border-radius: 4px;
-  padding: 4px;
-  margin-top: 8px;
-  background: #fefefe;
   cursor: pointer;
-  transition: border-color 0.15s;
-}
-
-.drawing-thumbnail:hover {
-  border-color: #2196F3;
-}
-
-.drawing-thumbnail svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
 }

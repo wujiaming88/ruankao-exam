@@ -1,68 +1,7 @@
 /**
- * Drawing module types for the case analysis diagram editor.
+ * Drawing module types for the Excalidraw-based diagram editor.
  * Supports: AON network, AOA network, UML class, UML sequence, ER diagrams.
  */
-
-export type ShapeKind = 'rect' | 'ellipse' | 'diamond' | 'arrow' | 'line' | 'text'
-
-export interface Point {
-  x: number
-  y: number
-}
-
-export interface BaseShape {
-  id: string
-  kind: ShapeKind
-  x: number
-  y: number
-  label: string
-  strokeColor: string
-  fillColor: string
-}
-
-export interface RectShape extends BaseShape {
-  kind: 'rect'
-  width: number
-  height: number
-}
-
-export interface EllipseShape extends BaseShape {
-  kind: 'ellipse'
-  rx: number
-  ry: number
-}
-
-export interface DiamondShape extends BaseShape {
-  kind: 'diamond'
-  width: number
-  height: number
-}
-
-export interface ArrowShape extends BaseShape {
-  kind: 'arrow'
-  x2: number
-  y2: number
-}
-
-export interface LineShape extends BaseShape {
-  kind: 'line'
-  x2: number
-  y2: number
-}
-
-export interface TextShape extends BaseShape {
-  kind: 'text'
-  fontSize: number
-}
-
-export type DrawShape = RectShape | EllipseShape | DiamondShape | ArrowShape | LineShape | TextShape
-
-export interface DrawingData {
-  shapes: DrawShape[]
-  width: number
-  height: number
-  version: number
-}
 
 export type DiagramTemplate = 'blank' | 'aon' | 'aoa' | 'class' | 'sequence' | 'er'
 
@@ -72,4 +11,26 @@ export interface TemplateInfo {
   description: string
 }
 
-export type DrawTool = 'select' | 'rect' | 'ellipse' | 'diamond' | 'arrow' | 'line' | 'text'
+/**
+ * Serialized drawing data stored in localStorage.
+ * Contains the Excalidraw scene elements and app state.
+ */
+export interface DrawingData {
+  elements: ExcalidrawElement[]
+  appState?: Record<string, unknown>
+  version: number
+}
+
+/**
+ * Minimal Excalidraw element type for our template definitions.
+ * The full type comes from @excalidraw/excalidraw at runtime.
+ */
+export interface ExcalidrawElement {
+  id: string
+  type: string
+  x: number
+  y: number
+  width: number
+  height: number
+  [key: string]: unknown
+}
