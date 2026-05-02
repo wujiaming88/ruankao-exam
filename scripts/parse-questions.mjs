@@ -34,7 +34,7 @@ function splitMergedQuestion(block, startNo, endNo) {
 
   // Try to split the answer into multiple parts
   // Format: "D、B" or "D,B" or "A、B、C、D、E"
-  const answerText = baseQ.answer || '';
+  const answerText = (baseQ.answer || '').trim();
   const answerParts = answerText.split(/[、,，\s]+/).filter(a => /^[A-D]$/.test(a));
 
   // If we have exactly the right number of answers, distribute them
@@ -121,6 +121,7 @@ function extractQuestion(block, number) {
   // Extract answer: match **答案**: X or **答案**：X
   // Support multiple answers separated by 、 or comma: "D、B" or "A,B,C"
   const ansMatch = block.match(/\*\*答案\*\*\s*[:：]\s*([A-D][、,，\s]*[A-D]*[、,，\s]*[A-D]*[、,，\s]*[A-D]*[、,，\s]*[A-D]*)/);
+  const answerRaw = ansMatch ? ansMatch[1].trim() : '';
   // Extract stem: before the first option line. Stem can be in **题目**: XXX or just text.
   // Options: lines like "- A. ..." or "A、..." or "A. ..."
   const optMatches = [];
@@ -169,7 +170,7 @@ function extractQuestion(block, number) {
       number,
       stem,
       options: [], // Empty options for simplified format
-      answer: ansMatch ? ansMatch[1] : '',
+      answer: answerRaw,
       explanation,
     };
   }
@@ -194,7 +195,7 @@ function extractQuestion(block, number) {
     number,
     stem,
     options: optMatches,
-    answer: ansMatch ? ansMatch[1] : '',
+    answer: answerRaw,
     explanation,
   };
 }
@@ -213,7 +214,7 @@ function parseAnswersOnly(content) {
     const explMatch = block.match(/\*\*解析\*\*\s*[:：]\s*([\s\S]*?)(?=\n\s*(?:\*\*[^*]|---|###|$))/);
     result.push({
       number: no,
-      answer: ansMatch ? ansMatch[1] : '',
+      answer: ansMatch ? ansMatch[1].trim() : '',
       explanation: explMatch ? explMatch[1].trim() : '',
     });
   }

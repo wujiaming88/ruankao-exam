@@ -109,7 +109,8 @@ function ResultMcReview({
   paperQuestions: import('../types').MultiChoiceQuestion[];
   answers: Record<number, string>;
 }) {
-  const onlyWrong = paperQuestions.filter(q => q.answer && answers[q.number] && answers[q.number] !== q.answer);
+  // Trim answers for comparison to handle whitespace issues in source data
+  const onlyWrong = paperQuestions.filter(q => q.answer && answers[q.number] && answers[q.number].trim() !== q.answer.trim());
   const unanswered = paperQuestions.filter(q => q.answer && !answers[q.number]);
 
   return (
@@ -125,12 +126,13 @@ function ResultMcReview({
         {paperQuestions.map(q => {
           const ua = answers[q.number];
           let cls = 'q-btn';
+          // Trim answers for comparison to handle whitespace issues
           if (!q.answer) cls += '';
           else if (!ua) cls += '';
-          else if (ua === q.answer) cls += ' correct';
+          else if (ua.trim() === q.answer.trim()) cls += ' correct';
           else cls += ' wrong';
           return (
-            <div key={q.number} className={cls} title={`第${q.number}题: ${q.answer ? (ua === q.answer ? '✓' : ua ? '✗ ' + ua + '→' + q.answer : '未答') : '无答案'}`} style={{ cursor: 'default' }}>
+            <div key={q.number} className={cls} title={`第${q.number}题: ${q.answer ? (ua?.trim() === q.answer.trim() ? '✓' : ua ? '✗ ' + ua + '→' + q.answer.trim() : '未答') : '无答案'}`} style={{ cursor: 'default' }}>
               {q.number}
             </div>
           );

@@ -84,7 +84,8 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
     for (const q of paper.questions) {
       if (!q.answer) continue;
       scored++;
-      if (answers[q.number] === q.answer) correct++;
+      // Trim both answers to handle whitespace issues in source data
+      if (answers[q.number]?.trim() === q.answer.trim()) correct++;
     }
     const total = scored;
     const score = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -94,7 +95,8 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
     for (const q of paper.questions) {
       if (!q.answer) continue;
       const ua = answers[q.number];
-      if (ua && ua !== q.answer) {
+      // Trim both answers to handle whitespace issues in source data
+      if (ua && ua.trim() !== q.answer.trim()) {
         mistakes.push({
           examId: exam.id,
           examTitle: exam.title,
@@ -219,8 +221,9 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
               let cls = 'mc-option';
               if (selected) cls += ' selected';
               if (mode === 'practice' && answers[current.number] && current.answer) {
-                if (opt.key === current.answer) cls += ' correct';
-                else if (selected && opt.key !== current.answer) cls += ' wrong';
+                // Trim answers for comparison to handle whitespace issues
+                if (opt.key === current.answer.trim()) cls += ' correct';
+                else if (selected && opt.key !== current.answer.trim()) cls += ' wrong';
               }
               return (
                 <div
@@ -238,8 +241,8 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
           {mode === 'practice' && answers[current.number] && current.answer && (
             <div className="mc-explanation">
               <div>
-                <strong>正确答案：{current.answer}</strong>
-                {answers[current.number] === current.answer ? ' ✓ 回答正确' : ' ✗ 回答错误'}
+                <strong>正确答案：{current.answer.trim()}</strong>
+                {answers[current.number].trim() === current.answer.trim() ? ' ✓ 回答正确' : ' ✗ 回答错误'}
               </div>
               {current.explanation && (
                 <div style={{ marginTop: 6 }}>解析：{current.explanation}</div>
