@@ -27,11 +27,30 @@ function walk(dir, out = []) {
 }
 
 // Parse a 综合知识 markdown: blocks split by `### 第N题` or `#### 第N题`.
-function parseMultiChoice(content) {
+// answerContent is optional - for mock exams with separate answer files
+function parseMultiChoice(questionContent, answerContent = null) {
+  // First, extract answers from answer file if provided
+  const answerMap = new Map();
+  if (answerContent) {
+    const answerHeaders = [...answerContent.matchAll(/^#{2,4}\s*第\s*(\d+)\s*题[^\n]*/gm)];
+    const answerParts = answerContent.split(/^#{2,4}\s*第\s*\d+\s*题[^\n]*\r?\n/m);
+
+    for (let i = 0; i < answerHeaders.length; i++) {
+      const qNum = parseInt(answerHeaders[i][1], 10);
+      const block = answerParts[i + 1] || '';
+
+      // Extract answer
+      const ansMatch = block.match(/\*\*答案\*\*\s*[:：]\s*([A-D])/);
+      if (ansMatch) {
+        answerMap.set(qNum, ansMatch[1]);
+      }
+    }
+  }
+
   const result = [];
   // Match headers: "### 第1题", "### 第68-72题", etc.
-  const parts = content.split(/^#{2,4}\s*第\s*\d+(?:[-~～]\d+)?\s*题[^\n]*\r?\n/m);
-  const headers = [...content.matchAll(/^#{2,4}\s*第\s*(\d+)(?:[-~～](\d+))?\s*题[^\n]*/gm)];
+  const parts = questionContent.split(/^#{2,4}\s*第\s*\d+(?:[-~～]\d+)?\s*题[^\n]*\r?\n/m);
+  const headers = [...questionContent.matchAll(/^#{2,4}\s*第\s*(\d+)(?:[-~～](\d+))?\s*题[^\n]*/gm)];
   if (headers.length === 0) return result;
 
   // parts[0] is preamble, parts[i+1] corresponds to headers[i]
@@ -40,18 +59,25 @@ function parseMultiChoice(content) {
     const endNo = headers[i][2] ? parseInt(headers[i][2], 10) : startNo;
     const block = parts[i + 1] || '';
 
-    // For merged headers (e.g., "第71-75题"):
-    // Check if there are individual sub-headers for the same range anywhere in content
+    // For merged headers (e.g., "第71-75题" or "第14～15题"):
     if (endNo > startNo) {
-      // Look for individual header for the start number in the full content
-      const hasIndividualHeaders = new RegExp(`^#{3,4}\\s*第\\s*${startNo}\\s*题`, 'm').test(content);
+      // Check if there are individual sub-headers for the same range anywhere in content
+      const hasIndividualHeaders = new RegExp(`^#{3,4}\\s*第\\s*${startNo}\\s*题`, 'm').test(questionContent);
       if (hasIndividualHeaders) {
         // Skip this merged header, individual headers will be processed
         continue;
       }
+
+      // No individual headers - need to split the merged question
+      // Try to extract separate per-question options and answers
+      const questions = extractMergedQuestions(block, startNo, endNo, answerMap);
+      if (questions.length > 0) {
+        result.push(...questions);
+        continue;
+      }
     }
 
-    const q = extractQuestion(block, startNo);
+    const q = extractQuestion(block, startNo, answerMap);
     if (q) result.push(q);
   }
 
@@ -108,35 +134,127 @@ function parseMultiChoice(content) {
   return processed;
 }
 
-function extractQuestion(block, number) {
-  // Extract answer
-  const ansMatch = block.match(/\*\*答案\*\*\s*[:：]\s*(.+?)(?=\n\n|\n\*\*|$)/s);
+// Extract merged questions from a block with format like "第14～15题"
+// where each sub-question has its own options section
+function extractMergedQuestions(block, startNo, endNo, answerMap = null) {
+  const questions = [];
+
+  // Extract main stem
+  const answerIdx = block.search(/\*\*答案\*\*\s*[:：]/);
+  let mainStem = answerIdx >= 0 ? block.substring(0, answerIdx) : block;
+  mainStem = mainStem.replace(/^\s*\*\*题目\*\*\s*[:：]\s*/m, '');
+  mainStem = mainStem.replace(/^#+\s.*$/gm, '').trim();
+
+  // Remove per-question option sections from main stem
+  mainStem = mainStem.replace(/\n\n\*\*[（(]第\d+题[）)]选项\*\*[:：][\s\S]*$/m, '').trim();
+
+  // Extract answers for each question
+  const answerBlock = block.substring(answerIdx >= 0 ? answerIdx : block.length);
+  const answersByNumber = new Map();
+
+  // Try to parse "第N题 X，第M题 Y" format
+  const answerMatches = [...answerBlock.matchAll(/第\s*(\d+)\s*题\s*[^A-D]*([A-D])/g)];
+  for (const m of answerMatches) {
+    const qNum = parseInt(m[1], 10);
+    const ans = m[2];
+    answersByNumber.set(qNum, ans);
+  }
+
+  // Extract options for each sub-question
+  for (let qNum = startNo; qNum <= endNo; qNum++) {
+    // Find options section for this question: **（第N题）选项**: or **(第N题)选项**:
+    // Use simpler approach: split by lines and look for the marker
+    const lines = block.split(/\r?\n/);
+    let inOptionsSection = false;
+    let currentQuestion = -1;
+    const optMatches = [];
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const line = lines[idx];
+
+      // Check if this is an options header for current question
+      const optHeaderMatch = line.match(/\*\*[（(]第(\d+)题[）)]选项\*\*\s*[:：]/);
+      if (optHeaderMatch) {
+        currentQuestion = parseInt(optHeaderMatch[1], 10);
+        inOptionsSection = currentQuestion === qNum;
+        continue;
+      }
+
+      // Check if we hit next section (answer or next question's options)
+      if (/\*\*答案\*\*/.test(line) || (/\*\*[（(]第\d+题[）)]选项\*\*/.test(line) && currentQuestion !== qNum)) {
+        inOptionsSection = false;
+      }
+
+      // Extract option if in correct section
+      if (inOptionsSection) {
+        const optMatch = line.match(/^[-*]?\s*([A-D])[\.、]\s*(.+?)$/);
+        if (optMatch) {
+          const letter = optMatch[1];
+          const text = optMatch[2].trim();
+          if (!optMatches.find(o => o.key === letter)) {
+            optMatches.push({ key: letter, text });
+          }
+        }
+      }
+    }
+
+    if (optMatches.length < 2) {
+      continue;
+    }
+
+    // Get answer
+    let answer = answersByNumber.get(qNum) || (answerMap ? answerMap.get(qNum) : null) || '';
+
+    // Build stem with blank indicator
+    const stemWithBlank = mainStem.replace(new RegExp(`[（(]\\s*${qNum}\\s*[）)]`, 'g'), '（ ）');
+
+    questions.push({
+      number: qNum,
+      stem: stemWithBlank.trim(),
+      options: optMatches,
+      answer,
+      explanation: '', // Explanation is typically shared for merged questions
+    });
+  }
+
+  return questions;
+}
+
+function extractQuestion(block, number, answerMap = null) {
+  // Extract answer - first try from answerMap (for mock exams), then from block
   let answerRaw = '';
   let isMultiBlank = false;
   let multiBlankAnswers = [];
 
-  if (ansMatch) {
-    const fullAnswer = ansMatch[1].trim();
-    if (!/待补充/.test(fullAnswer)) {
-      // Check if multi-blank: contains 、 or multiple letters with brackets
-      // e.g., "A（Session Bean）、B（Entity Bean）、C（Message-driven Bean）"
-      // or "C（信息设施）、B（信息功能）"
-      if (/[A-D]\s*[（(].*?[）)]\s*[、,]\s*[A-D]/.test(fullAnswer)) {
-        // Multi-blank format with explanations
-        const matches = [...fullAnswer.matchAll(/([A-D])\s*[（(]/g)];
-        multiBlankAnswers = matches.map(m => m[1]);
-        isMultiBlank = multiBlankAnswers.length >= 2;
-      } else if (/[A-D]\s*[、,]\s*[A-D]/.test(fullAnswer) && !/第\d+题/.test(fullAnswer)) {
-        // Simple multi-blank: "D、A" or "C、B"
-        const letters = fullAnswer.match(/[A-D]/g) || [];
-        multiBlankAnswers = letters;
-        isMultiBlank = letters.length >= 2;
-      }
+  // Try answerMap first (for mock exams with separate answer files)
+  if (answerMap && answerMap.has(number)) {
+    answerRaw = answerMap.get(number);
+  } else {
+    // Try to extract from block (for real exams)
+    const ansMatch = block.match(/\*\*答案\*\*\s*[:：]\s*(.+?)(?=\n\n|\n\*\*|$)/s);
+    if (ansMatch) {
+      const fullAnswer = ansMatch[1].trim();
+      if (!/待补充/.test(fullAnswer)) {
+        // Check if multi-blank: contains 、 or multiple letters with brackets
+        // e.g., "A（Session Bean）、B（Entity Bean）、C（Message-driven Bean）"
+        // or "C（信息设施）、B（信息功能）"
+        if (/[A-D]\s*[（(].*?[）)]\s*[、,]\s*[A-D]/.test(fullAnswer)) {
+          // Multi-blank format with explanations
+          const matches = [...fullAnswer.matchAll(/([A-D])\s*[（(]/g)];
+          multiBlankAnswers = matches.map(m => m[1]);
+          isMultiBlank = multiBlankAnswers.length >= 2;
+        } else if (/[A-D]\s*[、,]\s*[A-D]/.test(fullAnswer) && !/第\d+题/.test(fullAnswer)) {
+          // Simple multi-blank: "D、A" or "C、B"
+          const letters = fullAnswer.match(/[A-D]/g) || [];
+          multiBlankAnswers = letters;
+          isMultiBlank = letters.length >= 2;
+        }
 
-      if (!isMultiBlank) {
-        // Single answer
-        const match = fullAnswer.match(/[A-D]/);
-        answerRaw = match ? match[0] : '';
+        if (!isMultiBlank) {
+          // Single answer
+          const match = fullAnswer.match(/[A-D]/);
+          answerRaw = match ? match[0] : '';
+        }
       }
     }
   }
@@ -153,6 +271,10 @@ function extractQuestion(block, number) {
   if (optMarkerIdx >= 0) {
     stemRaw = stemRaw.substring(0, optMarkerIdx).trim();
   }
+
+  // Remove any remaining option text from stem (markdown list format)
+  // Match lines like "- A. xxx" or "A. xxx" after the main stem
+  stemRaw = stemRaw.replace(/\n\n[-*]?\s*[A-D][\.、]\s*.+$/s, '').trim();
 
   // Extract options
   const optMatches = [];
@@ -195,6 +317,23 @@ function extractQuestion(block, number) {
         stem: stemRaw.trim(),
         options: optMatches,
         answer: '', // Will be split later
+        answers: multiBlankAnswers,
+        explanation,
+        isMultiBlank: true,
+        blankCount: blanks,
+      };
+    }
+  }
+
+  // Check if we missed multi-blank case: multiple answers but marked as single
+  if (!isMultiBlank && !answerRaw && multiBlankAnswers.length >= 2) {
+    const blanks = (stemRaw.match(/[（(]\s*\d*\s*[）)]/g) || []).length;
+    if (blanks === multiBlankAnswers.length) {
+      return {
+        number,
+        stem: stemRaw.trim(),
+        options: optMatches,
+        answer: '',
         answers: multiBlankAnswers,
         explanation,
         isMultiBlank: true,
@@ -288,8 +427,10 @@ function main() {
     const name = fname.replace(/_(题目|答案)\.md$/, '').replace('.md', '');
     // Skip README
     if (/^readme$/i.test(name)) return null;
-    // Skip answer files, only process question files for mock exams
-    if (kind === '模拟题' && fname.includes('答案')) return null;
+
+    // For mock exams: track both question and answer files
+    const isQuestionFile = fname.includes('题目');
+    const isAnswerFile = fname.includes('答案');
 
     // Determine paper type
     let paperType = null;
@@ -298,7 +439,7 @@ function main() {
     else if (/^论文/.test(name)) paperType = 'paper';
     if (!paperType) return null;
 
-    return { kind, subject, year, volume, paperType, file: p };
+    return { kind, subject, year, volume, paperType, file: p, isQuestionFile, isAnswerFile };
   }
 
   const allClassified = [];
@@ -326,7 +467,21 @@ function main() {
       });
     }
     const g = groups.get(key);
-    g[c.paperType] = { file: c.file };
+
+    // For mock exams: track both question and answer files
+    if (c.kind === '模拟题') {
+      if (!g[c.paperType]) {
+        g[c.paperType] = { questionFile: null, answerFile: null };
+      }
+      if (c.isQuestionFile) {
+        g[c.paperType].questionFile = c.file;
+      } else if (c.isAnswerFile) {
+        g[c.paperType].answerFile = c.file;
+      }
+    } else {
+      // For real exams: single file contains both questions and answers
+      g[c.paperType] = { file: c.file };
+    }
   }
 
   // Parse each group's papers
@@ -346,8 +501,24 @@ function main() {
 
     // Multi choice
     if (g.multi_choice) {
-      const content = fs.readFileSync(g.multi_choice.file, 'utf8');
-      const questions = parseMultiChoice(content);
+      let questions = [];
+      if (g.kind === '模拟题') {
+        // Mock exams: merge question and answer files
+        if (g.multi_choice.questionFile && g.multi_choice.answerFile) {
+          const questionContent = fs.readFileSync(g.multi_choice.questionFile, 'utf8');
+          const answerContent = fs.readFileSync(g.multi_choice.answerFile, 'utf8');
+          questions = parseMultiChoice(questionContent, answerContent);
+        } else if (g.multi_choice.questionFile) {
+          // Only question file exists
+          const content = fs.readFileSync(g.multi_choice.questionFile, 'utf8');
+          questions = parseMultiChoice(content);
+        }
+      } else {
+        // Real exams: single file with both questions and answers
+        const content = fs.readFileSync(g.multi_choice.file, 'utf8');
+        questions = parseMultiChoice(content);
+      }
+
       if (questions.length >= 20) {
         exam.papers.multi_choice = {
           duration: 150,
@@ -355,37 +526,43 @@ function main() {
           questions,
         };
         multiCount++;
-        console.log(`✅ ${g.year} 综合知识: ${questions.length} questions`);
+        console.log(`✅ ${g.year} ${g.volume || ''} 综合知识: ${questions.length} questions`);
       }
     }
 
     // Case analysis
     if (g.case) {
-      const content = fs.readFileSync(g.case.file, 'utf8');
-      const cases = parseCaseAnalysis(content);
-      if (cases.length >= 3) {
-        exam.papers.case = {
-          duration: 90,
-          required: 1,
-          choose: 2,
-          total_choose: 3,
-          cases,
-        };
-        caseCount++;
+      const caseFile = g.kind === '模拟题' ? g.case.questionFile : g.case.file;
+      if (caseFile) {
+        const content = fs.readFileSync(caseFile, 'utf8');
+        const cases = parseCaseAnalysis(content);
+        if (cases.length >= 3) {
+          exam.papers.case = {
+            duration: 90,
+            required: 1,
+            choose: 2,
+            total_choose: 3,
+            cases,
+          };
+          caseCount++;
+        }
       }
     }
 
     // Paper
     if (g.paper) {
-      const content = fs.readFileSync(g.paper.file, 'utf8');
-      const topics = parsePaper(content);
-      if (topics.length >= 2) {
-        exam.papers.paper = {
-          duration: 120,
-          choose: 1,
-          topics,
-        };
-        paperCount++;
+      const paperFile = g.kind === '模拟题' ? g.paper.questionFile : g.paper.file;
+      if (paperFile) {
+        const content = fs.readFileSync(paperFile, 'utf8');
+        const topics = parsePaper(content);
+        if (topics.length >= 2) {
+          exam.papers.paper = {
+            duration: 120,
+            choose: 1,
+            topics,
+          };
+          paperCount++;
+        }
       }
     }
 
