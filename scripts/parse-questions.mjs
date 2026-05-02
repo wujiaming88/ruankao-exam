@@ -254,33 +254,39 @@ function buildExamId(kind, subject, year, volume) {
 
 function main() {
   const realFiles = walk(path.join(SOURCE_ROOT, '真题'));
+  const mockFiles = walk(path.join(SOURCE_ROOT, '模拟题'));
 
-  // Group files: kind|subject|year => { 综合知识, 案例分析, 论文 }
+  // Group files: kind|subject|year|volume => { 综合知识, 案例分析, 论文 }
   const groups = new Map();
 
   function classify(p, kind) {
     const rel = path.relative(SOURCE_ROOT, p);
     const parts = rel.split(path.sep);
+    const fname = parts[parts.length - 1];
+
     // 真题: kind=真题, subject=parts[1], year=parts[2], file=parts[3]
+    // 模拟题: kind=模拟题, subject=parts[1], year=parts[2], volume=parts[3], file=parts[4]
     const subject = parts[1];
     const year = parts[2];
-    const fname = parts[parts.length - 1];
+    const volume = kind === '模拟题' ? parts[3] : null;
 
     // Only process 系统架构设计师
     if (subject !== ALLOWED_SUBJECT) return null;
 
-    const name = fname.replace('.md', '');
+    const name = fname.replace(/_(题目|答案)\.md$/, '').replace('.md', '');
     // Skip README
     if (/^readme$/i.test(name)) return null;
+    // Skip answer files, only process question files for mock exams
+    if (kind === '模拟题' && fname.includes('答案')) return null;
 
     // Determine paper type
     let paperType = null;
-    if (/^综合知识$/.test(name)) paperType = 'multi_choice';
-    else if (/^案例分析$/.test(name)) paperType = 'case';
-    else if (/^论文$/.test(name)) paperType = 'paper';
+    if (/^综合知识/.test(name)) paperType = 'multi_choice';
+    else if (/^案例分析/.test(name)) paperType = 'case';
+    else if (/^论文/.test(name)) paperType = 'paper';
     if (!paperType) return null;
 
-    return { kind, subject, year, paperType, file: p };
+    return { kind, subject, year, volume, paperType, file: p };
   }
 
   const allClassified = [];
@@ -288,16 +294,20 @@ function main() {
     const c = classify(f, '真题');
     if (c) allClassified.push(c);
   }
+  for (const f of mockFiles) {
+    const c = classify(f, '模拟题');
+    if (c) allClassified.push(c);
+  }
 
   for (const c of allClassified) {
-    const key = [c.kind, c.subject, c.year].join('|');
+    const key = [c.kind, c.subject, c.year, c.volume].filter(Boolean).join('|');
     if (!groups.has(key)) {
       groups.set(key, {
-        id: buildExamId(c.kind, c.subject, c.year, null),
+        id: buildExamId(c.kind, c.subject, c.year, c.volume),
         kind: c.kind,
         subject: c.subject,
         year: c.year,
-        volume: null,
+        volume: c.volume,
         multi_choice: null,
         case: null,
         paper: null,
@@ -318,7 +328,7 @@ function main() {
       subject: g.subject,
       year: g.year,
       volume: g.volume,
-      title: [g.year, g.subject].filter(Boolean).join(' '),
+      title: [g.year, g.subject, g.volume].filter(Boolean).join(' '),
       papers: {},
     };
 
