@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Markdown from '../../components/Markdown';
 import type { Exam, ExamMode, ExamRecord, MistakeItem, MultiChoicePaper, MultiChoiceState } from '../../types';
 import {
   addMistakes,
@@ -203,7 +204,7 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
               <span style={{ color: 'var(--marked)', marginLeft: 12 }}>● 已标记</span>
             )}
           </div>
-          <div className="mc-stem">{cleanedStem}</div>
+          <div className="mc-stem"><Markdown content={cleanedStem} /></div>
 
           {current.options.length === 0 && (
             <div
