@@ -265,9 +265,9 @@ function extractQuestion(block, number, answerMap = null) {
   stemRaw = stemRaw.replace(/^\s*\*\*题目\*\*\s*[:：]\s*/m, '');
   stemRaw = stemRaw.replace(/^#+\s.*$/gm, '').trim();
 
-  // Remove "**选项**:" marker and all option lines that follow (markdown list format)
+  // Remove "**选项**:" marker (including variants like "**选项**（第N空）:") and all option lines that follow
   // Keep everything before "**选项**:"
-  const optMarkerIdx = stemRaw.search(/\n\n\*\*选项[^:]*\*\*\s*[:：]/);
+  const optMarkerIdx = stemRaw.search(/\n*\*\*选项\*\*[^:\n]*\s*[:：]/);
   if (optMarkerIdx >= 0) {
     stemRaw = stemRaw.substring(0, optMarkerIdx).trim();
   }
@@ -275,6 +275,18 @@ function extractQuestion(block, number, answerMap = null) {
   // Remove any remaining option text from stem (markdown list format)
   // Match lines like "- A. xxx" or "A. xxx" after the main stem
   stemRaw = stemRaw.replace(/\n\n[-*]?\s*[A-D][\.、]\s*.+$/s, '').trim();
+
+  // Clean up remaining option lines that may be embedded in stem
+  // Remove lines starting with "- A." / "- B." / "- C." / "- D." or "- A、" patterns
+  stemRaw = stemRaw.split('\n').filter(line => {
+    // Keep lines that don't look like option markers
+    return !/^[-*]?\s*[A-D][\.、]\s*.+$/.test(line.trim());
+  }).join('\n').trim();
+
+  // Remove lines starting with "A." / "B." / "C." / "D." or "A、" patterns (no dash prefix)
+  stemRaw = stemRaw.split('\n').filter(line => {
+    return !/^[A-D][\.、]\s*.+$/.test(line.trim());
+  }).join('\n').trim();
 
   // Extract options
   const optMatches = [];
