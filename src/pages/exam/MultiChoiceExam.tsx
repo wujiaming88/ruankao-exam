@@ -48,6 +48,17 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
   const startedAtRef = useRef<number>(initialState.startedAt);
 
   const current = paper.questions[currentIdx];
+  const isMultiBlank = !!(current.blanks && current.blanks.length > 1);
+
+  // Clean stem: remove embedded options and trailing blank markers
+  const cleanedStem = useMemo(() => {
+    let stem = current.stem;
+    // Remove embedded markdown options (e.g., "- A. text\n- B. text\n...")
+    stem = stem.replace(/^[\s]*[-*]\s+[A-D]\.\s+.+$/gm, '').trim();
+    // Remove trailing blank markers like "(第1空)" or "(第2空)"
+    stem = stem.replace(/[（(]第\d+空[）)]\s*$/g, '').trim();
+    return stem;
+  }, [current.stem]);
 
   // Autosave
   useEffect(() => {
@@ -82,11 +93,24 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
     let correct = 0;
     let scored = 0;
     for (const q of paper.questions) {
-      if (!q.answer) continue;
+      const hasAnswer = q.answer || (q.blanks && q.blanks.length > 0);
+      if (!hasAnswer) continue;
       scored++;
-      // Trim both answers to handle whitespace issues in source data
+
       const ua = answers[q.number];
-      if (typeof ua === 'string' && ua.trim() === q.answer.trim()) correct++;
+
+      if (q.blanks && q.blanks.length > 0) {
+        // Multi-blank: all blanks must be correct
+        if (typeof ua === 'object' && ua !== null) {
+          const allCorrect = q.blanks.every(blank =>
+            ua[blank.index]?.trim() === blank.answer.trim()
+          );
+          if (allCorrect) correct++;
+        }
+      } else if (q.answer) {
+        // Single answer: trim both answers to handle whitespace issues
+        if (typeof ua === 'string' && ua.trim() === q.answer.trim()) correct++;
+      }
     }
     const total = scored;
     const score = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -94,17 +118,37 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
     // Collect mistakes
     const mistakes: MistakeItem[] = [];
     for (const q of paper.questions) {
-      if (!q.answer) continue;
+      const hasAnswer = q.answer || (q.blanks && q.blanks.length > 0);
+      if (!hasAnswer) continue;
+
       const ua = answers[q.number];
-      // Trim both answers to handle whitespace issues in source data
-      if (ua && typeof ua === 'string' && ua.trim() !== q.answer.trim()) {
+      let isWrong = false;
+      let correctAnswer: string | Record<number, string>;
+
+      if (q.blanks && q.blanks.length > 0) {
+        // Multi-blank
+        correctAnswer = Object.fromEntries(q.blanks.map(b => [b.index, b.answer]));
+        if (typeof ua === 'object' && ua !== null) {
+          isWrong = !q.blanks.every(blank => ua[blank.index]?.trim() === blank.answer.trim());
+        } else {
+          isWrong = true;
+        }
+      } else if (q.answer) {
+        // Single answer
+        correctAnswer = q.answer;
+        isWrong = !(typeof ua === 'string' && ua.trim() === q.answer.trim());
+      } else {
+        continue;
+      }
+
+      if (isWrong && ua) {
         mistakes.push({
           examId: exam.id,
           examTitle: exam.title,
           questionNumber: q.number,
           stem: q.stem,
           options: q.options,
-          correctAnswer: q.answer,
+          correctAnswer,
           userAnswer: ua,
           explanation: q.explanation,
           addedAt: Date.now(),
@@ -140,8 +184,19 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
     }
   }, [remainingSec, mode, doSubmit]);
 
-  const selectAnswer = (letter: string) => {
-    setAnswers(prev => ({ ...prev, [current.number]: letter }));
+  const selectAnswer = (letter: string, blankIndex?: number) => {
+    setAnswers(prev => {
+      if (isMultiBlank && blankIndex !== undefined) {
+        // Multi-blank: update specific blank
+        const existing = prev[current.number] as Record<number, string> | undefined;
+        return {
+          ...prev,
+          [current.number]: { ...(existing || {}), [blankIndex]: letter },
+        };
+      }
+      // Single answer
+      return { ...prev, [current.number]: letter };
+    });
   };
 
   const toggleMark = () => {
@@ -195,7 +250,7 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
               <span style={{ color: 'var(--marked)', marginLeft: 12 }}>● 已标记</span>
             )}
           </div>
-          <div className="mc-stem">{current.stem}</div>
+          <div className="mc-stem">{cleanedStem}</div>
 
           {current.options.length === 0 && (
             <div
@@ -213,47 +268,111 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
             </div>
           )}
 
-          <div className="mc-options">
-            {(current.options.length >= 4
-              ? current.options
-              : ['A', 'B', 'C', 'D'].map(k => ({ key: k, text: `选项 ${k}` }))
-            ).map(opt => {
-              const userAnswer = answers[current.number];
-              const selected = typeof userAnswer === 'string' && userAnswer === opt.key;
-              let cls = 'mc-option';
-              if (selected) cls += ' selected';
-              if (mode === 'practice' && userAnswer && current.answer) {
-                // Trim answers for comparison to handle whitespace issues
-                if (opt.key === current.answer.trim()) cls += ' correct';
-                else if (selected && opt.key !== current.answer.trim()) cls += ' wrong';
-              }
+          {isMultiBlank ? (
+            // Multi-blank question: show options for each blank
+            <div>
+              {current.blanks!.map(blank => {
+                const userAnswer = answers[current.number] as Record<number, string> | undefined;
+                const userBlankAnswer = userAnswer?.[blank.index];
+                return (
+                  <div key={blank.index} style={{ marginBottom: 20 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, color: '#666' }}>
+                      第 {blank.index} 空：
+                    </div>
+                    <div className="mc-options">
+                      {(current.options.length >= 4
+                        ? current.options
+                        : ['A', 'B', 'C', 'D'].map(k => ({ key: k, text: `选项 ${k}` }))
+                      ).map(opt => {
+                        const selected = userBlankAnswer === opt.key;
+                        let cls = 'mc-option';
+                        if (selected) cls += ' selected';
+                        if (mode === 'practice' && userBlankAnswer) {
+                          if (opt.key === blank.answer.trim()) cls += ' correct';
+                          else if (selected && opt.key !== blank.answer.trim()) cls += ' wrong';
+                        }
+                        return (
+                          <div
+                            key={opt.key}
+                            className={cls}
+                            onClick={() => selectAnswer(opt.key, blank.index)}
+                          >
+                            <div className="key">{opt.key}</div>
+                            <div className="text">{opt.text}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            // Single-choice question
+            <div className="mc-options">
+              {(current.options.length >= 4
+                ? current.options
+                : ['A', 'B', 'C', 'D'].map(k => ({ key: k, text: `选项 ${k}` }))
+              ).map(opt => {
+                const userAnswer = answers[current.number];
+                const selected = typeof userAnswer === 'string' && userAnswer === opt.key;
+                let cls = 'mc-option';
+                if (selected) cls += ' selected';
+                if (mode === 'practice' && userAnswer && current.answer) {
+                  // Trim answers for comparison to handle whitespace issues
+                  if (opt.key === current.answer.trim()) cls += ' correct';
+                  else if (selected && opt.key !== current.answer.trim()) cls += ' wrong';
+                }
+                return (
+                  <div
+                    key={opt.key}
+                    className={cls}
+                    onClick={() => selectAnswer(opt.key)}
+                  >
+                    <div className="key">{opt.key}</div>
+                    <div className="text">{opt.text}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {mode === 'practice' && answers[current.number] && (() => {
+            if (isMultiBlank) {
+              // Multi-blank explanation
+              const userAnswer = answers[current.number] as Record<number, string> | undefined;
+              const allCorrect = current.blanks!.every(blank =>
+                userAnswer?.[blank.index]?.trim() === blank.answer.trim()
+              );
+              const correctAnswerText = current.blanks!.map(b => `第${b.index}空: ${b.answer}`).join('，');
               return (
-                <div
-                  key={opt.key}
-                  className={cls}
-                  onClick={() => selectAnswer(opt.key)}
-                >
-                  <div className="key">{opt.key}</div>
-                  <div className="text">{opt.text}</div>
+                <div className="mc-explanation">
+                  <div>
+                    <strong>正确答案：{correctAnswerText}</strong>
+                    {allCorrect ? ' ✓ 全部正确' : ' ✗ 有错误'}
+                  </div>
+                  {current.explanation && (
+                    <div style={{ marginTop: 6 }}>解析：{current.explanation}</div>
+                  )}
                 </div>
               );
-            })}
-          </div>
-
-          {mode === 'practice' && answers[current.number] && current.answer && (() => {
-            const userAnswer = answers[current.number];
-            const isCorrect = typeof userAnswer === 'string' && userAnswer.trim() === current.answer.trim();
-            return (
-              <div className="mc-explanation">
-                <div>
-                  <strong>正确答案：{current.answer.trim()}</strong>
-                  {isCorrect ? ' ✓ 回答正确' : ' ✗ 回答错误'}
+            } else if (current.answer) {
+              // Single-choice explanation
+              const userAnswer = answers[current.number];
+              const isCorrect = typeof userAnswer === 'string' && userAnswer.trim() === current.answer.trim();
+              return (
+                <div className="mc-explanation">
+                  <div>
+                    <strong>正确答案：{current.answer.trim()}</strong>
+                    {isCorrect ? ' ✓ 回答正确' : ' ✗ 回答错误'}
+                  </div>
+                  {current.explanation && (
+                    <div style={{ marginTop: 6 }}>解析：{current.explanation}</div>
+                  )}
                 </div>
-                {current.explanation && (
-                  <div style={{ marginTop: 6 }}>解析：{current.explanation}</div>
-                )}
-              </div>
-            );
+              );
+            }
+            return null;
           })()}
 
           <div className="mc-nav-bar">

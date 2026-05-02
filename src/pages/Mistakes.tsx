@@ -101,24 +101,33 @@ export default function Mistakes() {
                 <div style={{ marginBottom: 8 }}>{m.stem}</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
                   {m.options.map(o => {
-                    const correctAnswer = typeof m.correctAnswer === 'string' ? m.correctAnswer : '';
-                    const userAnswer = typeof m.userAnswer === 'string' ? m.userAnswer : '';
+                    const isUserChoice = typeof m.userAnswer === 'string'
+                      ? o.key === m.userAnswer
+                      : typeof m.userAnswer === 'object' && m.userAnswer !== null
+                        ? Object.values(m.userAnswer).includes(o.key)
+                        : false;
+                    const isCorrectChoice = typeof m.correctAnswer === 'string'
+                      ? o.key === m.correctAnswer
+                      : typeof m.correctAnswer === 'object' && m.correctAnswer !== null
+                        ? Object.values(m.correctAnswer).includes(o.key)
+                        : false;
+
                     return (
                       <div
                         key={o.key}
                         style={{
                           fontSize: 13,
                           color:
-                            o.key === correctAnswer
+                            isCorrectChoice
                               ? 'var(--success)'
-                              : o.key === userAnswer
+                              : isUserChoice
                                 ? 'var(--danger)'
                                 : 'var(--text-muted)',
                         }}
                       >
                         {o.key}. {o.text}
-                        {o.key === correctAnswer && ' ✓'}
-                        {o.key === userAnswer && o.key !== correctAnswer && ' ✗'}
+                        {isCorrectChoice && ' ✓'}
+                        {isUserChoice && !isCorrectChoice && ' ✗'}
                       </div>
                     );
                   })}

@@ -122,9 +122,20 @@ function ResultMcReview({
   // Trim answers for comparison to handle whitespace issues in source data
   const onlyWrong = paperQuestions.filter(q => {
     const ua = answers[q.number];
-    return q.answer && ua && typeof ua === 'string' && ua.trim() !== q.answer.trim();
+    if (q.blanks && q.blanks.length > 0) {
+      // Multi-blank: wrong if any blank is incorrect
+      if (!ua || typeof ua !== 'object') return true;
+      return !q.blanks.every(blank => ua[blank.index]?.trim() === blank.answer.trim());
+    } else if (q.answer) {
+      // Single answer
+      return ua && typeof ua === 'string' && ua.trim() !== q.answer.trim();
+    }
+    return false;
   });
-  const unanswered = paperQuestions.filter(q => q.answer && !answers[q.number]);
+  const unanswered = paperQuestions.filter(q => {
+    const hasAnswer = q.answer || (q.blanks && q.blanks.length > 0);
+    return hasAnswer && !answers[q.number];
+  });
 
   return (
     <>
@@ -139,16 +150,32 @@ function ResultMcReview({
         {paperQuestions.map(q => {
           const ua = answers[q.number];
           let cls = 'q-btn';
-          // Trim answers for comparison to handle whitespace issues
-          if (!q.answer) cls += '';
-          else if (!ua) cls += '';
-          else if (typeof ua === 'string' && ua.trim() === q.answer.trim()) cls += ' correct';
-          else cls += ' wrong';
-          const tooltipText = q.answer
-            ? (typeof ua === 'string' && ua.trim() === q.answer.trim()
+          let isCorrect = false;
+          const hasAnswer = q.answer || (q.blanks && q.blanks.length > 0);
+
+          if (!hasAnswer) {
+            cls += '';
+          } else if (!ua) {
+            cls += '';
+          } else if (q.blanks && q.blanks.length > 0) {
+            // Multi-blank
+            isCorrect = typeof ua === 'object' &&
+                       q.blanks.every(blank => ua[blank.index]?.trim() === blank.answer.trim());
+            cls += isCorrect ? ' correct' : ' wrong';
+          } else if (q.answer) {
+            // Single answer
+            isCorrect = typeof ua === 'string' && ua.trim() === q.answer.trim();
+            cls += isCorrect ? ' correct' : ' wrong';
+          }
+
+          const correctAnswerText = q.blanks && q.blanks.length > 0
+            ? q.blanks.map(b => `${b.index}:${b.answer}`).join(', ')
+            : q.answer?.trim() || '';
+          const tooltipText = hasAnswer
+            ? (isCorrect
                 ? '✓'
                 : ua
-                  ? `✗ ${typeof ua === 'string' ? ua : 'multi-blank'}→${q.answer.trim()}`
+                  ? `✗ ${formatAnswer(ua)}→${correctAnswerText}`
                   : '未答')
             : '无答案';
           return (
@@ -164,33 +191,46 @@ function ResultMcReview({
       <div className="review-list">
         {onlyWrong.slice(0, 20).map(q => {
           const ua = answers[q.number];
-          const userAnswerStr = typeof ua === 'string' ? ua : '';
+          const correctAnswerText = q.blanks && q.blanks.length > 0
+            ? q.blanks.map(b => `第${b.index}空: ${b.answer}`).join('，')
+            : q.answer || '';
+
           return (
             <div className="review-item" key={q.number}>
               <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
                 第 {q.number} 题 <span style={{ color: 'var(--danger)' }}>✗</span>
                 <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontWeight: 400 }}>
-                  你的答案: {formatAnswer(ua)} · 正确答案: {q.answer}
+                  你的答案: {formatAnswer(ua)} · 正确答案: {correctAnswerText}
                 </span>
               </div>
               <div style={{ marginBottom: 8 }}>{q.stem}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-                {q.options.map(o => (
-                  <div
-                    key={o.key}
-                    style={{
-                      fontSize: 13,
-                      color:
-                        o.key === q.answer
-                          ? 'var(--success)'
-                          : o.key === userAnswerStr
-                            ? 'var(--danger)'
-                            : 'var(--text-muted)',
-                    }}
-                  >
-                    {o.key}. {o.text}
-                  </div>
-                ))}
+                {q.options.map(o => {
+                  const userAnswerStr = typeof ua === 'string' ? ua : '';
+                  const isUserChoice = q.blanks && q.blanks.length > 0
+                    ? (typeof ua === 'object' && ua !== null && Object.values(ua).includes(o.key))
+                    : o.key === userAnswerStr;
+                  const isCorrectChoice = q.blanks && q.blanks.length > 0
+                    ? q.blanks.some(b => b.answer === o.key)
+                    : o.key === q.answer;
+
+                  return (
+                    <div
+                      key={o.key}
+                      style={{
+                        fontSize: 13,
+                        color:
+                          isCorrectChoice
+                            ? 'var(--success)'
+                            : isUserChoice
+                              ? 'var(--danger)'
+                              : 'var(--text-muted)',
+                      }}
+                    >
+                      {o.key}. {o.text}
+                    </div>
+                  );
+                })}
               </div>
               {q.explanation && (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', background: '#f5f7fa', padding: 8, borderRadius: 3 }}>
