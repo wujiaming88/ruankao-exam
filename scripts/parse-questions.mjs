@@ -40,10 +40,11 @@ function parseMultiChoice(content) {
     const endNo = headers[i][2] ? parseInt(headers[i][2], 10) : startNo;
     const block = parts[i + 1] || '';
 
-    // For merged headers (e.g., "第68-72题"):
-    // Check if the block contains individual sub-headers for the same range
+    // For merged headers (e.g., "第71-75题"):
+    // Check if there are individual sub-headers for the same range anywhere in content
     if (endNo > startNo) {
-      const hasIndividualHeaders = new RegExp(`^#{2,4}\\s*第\\s*${startNo}\\s*题`, 'm').test(block);
+      // Look for individual header for the start number in the full content
+      const hasIndividualHeaders = new RegExp(`^#{3,4}\\s*第\\s*${startNo}\\s*题`, 'm').test(content);
       if (hasIndividualHeaders) {
         // Skip this merged header, individual headers will be processed
         continue;
@@ -133,6 +134,13 @@ function extractQuestion(block, number) {
   let stemRaw = answerIdx >= 0 ? block.substring(0, answerIdx) : block;
   stemRaw = stemRaw.replace(/^\s*\*\*题目\*\*\s*[:：]\s*/m, '');
   stemRaw = stemRaw.replace(/^#+\s.*$/gm, '').trim();
+
+  // Remove "**选项**:" marker and all option lines that follow (markdown list format)
+  // Keep everything before "**选项**:"
+  const optMarkerIdx = stemRaw.search(/\n\n\*\*选项[^:]*\*\*\s*[:：]/);
+  if (optMarkerIdx >= 0) {
+    stemRaw = stemRaw.substring(0, optMarkerIdx).trim();
+  }
 
   // Extract options
   const optMatches = [];
