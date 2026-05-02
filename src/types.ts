@@ -114,7 +114,7 @@ export interface ExamRecord {
   score?: number;
   total?: number;
   correct?: number;
-  answers?: Record<number, string>;
+  answers?: Record<number, string | Record<number, string>>;
   detail?: unknown;
 }
 

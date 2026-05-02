@@ -39,7 +39,7 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
     };
   }, [exam.id, mode, paper.duration]);
 
-  const [answers, setAnswers] = useState<Record<number, string>>(initialState.answers);
+  const [answers, setAnswers] = useState<Record<number, string | Record<number, string>>>(initialState.answers);
   const [marked, setMarked] = useState<Record<number, boolean>>(initialState.marked);
   const [currentIdx, setCurrentIdx] = useState<number>(initialState.currentIdx);
   const [remainingSec, setRemainingSec] = useState<number>(initialState.remainingSec);
@@ -85,7 +85,8 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
       if (!q.answer) continue;
       scored++;
       // Trim both answers to handle whitespace issues in source data
-      if (answers[q.number]?.trim() === q.answer.trim()) correct++;
+      const ua = answers[q.number];
+      if (typeof ua === 'string' && ua.trim() === q.answer.trim()) correct++;
     }
     const total = scored;
     const score = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -96,7 +97,7 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
       if (!q.answer) continue;
       const ua = answers[q.number];
       // Trim both answers to handle whitespace issues in source data
-      if (ua && ua.trim() !== q.answer.trim()) {
+      if (ua && typeof ua === 'string' && ua.trim() !== q.answer.trim()) {
         mistakes.push({
           examId: exam.id,
           examTitle: exam.title,
@@ -217,10 +218,11 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
               ? current.options
               : ['A', 'B', 'C', 'D'].map(k => ({ key: k, text: `选项 ${k}` }))
             ).map(opt => {
-              const selected = answers[current.number] === opt.key;
+              const userAnswer = answers[current.number];
+              const selected = typeof userAnswer === 'string' && userAnswer === opt.key;
               let cls = 'mc-option';
               if (selected) cls += ' selected';
-              if (mode === 'practice' && answers[current.number] && current.answer) {
+              if (mode === 'practice' && userAnswer && current.answer) {
                 // Trim answers for comparison to handle whitespace issues
                 if (opt.key === current.answer.trim()) cls += ' correct';
                 else if (selected && opt.key !== current.answer.trim()) cls += ' wrong';
@@ -238,17 +240,21 @@ export default function MultiChoiceExam({ exam, paper, mode }: Props) {
             })}
           </div>
 
-          {mode === 'practice' && answers[current.number] && current.answer && (
-            <div className="mc-explanation">
-              <div>
-                <strong>正确答案：{current.answer.trim()}</strong>
-                {answers[current.number].trim() === current.answer.trim() ? ' ✓ 回答正确' : ' ✗ 回答错误'}
+          {mode === 'practice' && answers[current.number] && current.answer && (() => {
+            const userAnswer = answers[current.number];
+            const isCorrect = typeof userAnswer === 'string' && userAnswer.trim() === current.answer.trim();
+            return (
+              <div className="mc-explanation">
+                <div>
+                  <strong>正确答案：{current.answer.trim()}</strong>
+                  {isCorrect ? ' ✓ 回答正确' : ' ✗ 回答错误'}
+                </div>
+                {current.explanation && (
+                  <div style={{ marginTop: 6 }}>解析：{current.explanation}</div>
+                )}
               </div>
-              {current.explanation && (
-                <div style={{ marginTop: 6 }}>解析：{current.explanation}</div>
-              )}
-            </div>
-          )}
+            );
+          })()}
 
           <div className="mc-nav-bar">
             <button

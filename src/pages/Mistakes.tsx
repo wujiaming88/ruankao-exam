@@ -7,6 +7,15 @@ function formatDate(ts: number): string {
   return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
 }
 
+function formatAnswer(answer: string | Record<number, string>): string {
+  if (typeof answer === 'string') return answer;
+  // Format multi-blank answer as "1:A, 2:B, 3:C"
+  return Object.entries(answer)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([idx, val]) => `${idx}:${val}`)
+    .join(', ');
+}
+
 export default function Mistakes() {
   const [mistakes, setMistakes] = useState(loadMistakes());
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,29 +100,33 @@ export default function Mistakes() {
                 </div>
                 <div style={{ marginBottom: 8 }}>{m.stem}</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-                  {m.options.map(o => (
-                    <div
-                      key={o.key}
-                      style={{
-                        fontSize: 13,
-                        color:
-                          o.key === m.correctAnswer
-                            ? 'var(--success)'
-                            : o.key === m.userAnswer
-                              ? 'var(--danger)'
-                              : 'var(--text-muted)',
-                      }}
-                    >
-                      {o.key}. {o.text}
-                      {o.key === m.correctAnswer && ' ✓'}
-                      {o.key === m.userAnswer && o.key !== m.correctAnswer && ' ✗'}
-                    </div>
-                  ))}
+                  {m.options.map(o => {
+                    const correctAnswer = typeof m.correctAnswer === 'string' ? m.correctAnswer : '';
+                    const userAnswer = typeof m.userAnswer === 'string' ? m.userAnswer : '';
+                    return (
+                      <div
+                        key={o.key}
+                        style={{
+                          fontSize: 13,
+                          color:
+                            o.key === correctAnswer
+                              ? 'var(--success)'
+                              : o.key === userAnswer
+                                ? 'var(--danger)'
+                                : 'var(--text-muted)',
+                        }}
+                      >
+                        {o.key}. {o.text}
+                        {o.key === correctAnswer && ' ✓'}
+                        {o.key === userAnswer && o.key !== correctAnswer && ' ✗'}
+                      </div>
+                    );
+                  })}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  你的答案: <span style={{ color: 'var(--danger)' }}>{m.userAnswer}</span>
+                  你的答案: <span style={{ color: 'var(--danger)' }}>{formatAnswer(m.userAnswer)}</span>
                   {' · '}
-                  正确答案: <span style={{ color: 'var(--success)' }}>{m.correctAnswer}</span>
+                  正确答案: <span style={{ color: 'var(--success)' }}>{formatAnswer(m.correctAnswer)}</span>
                 </div>
                 {m.explanation && (
                   <div

@@ -14,6 +14,16 @@ function formatDate(ts: number): string {
   return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 }
 
+function formatAnswer(answer: string | Record<number, string> | undefined): string {
+  if (!answer) return '';
+  if (typeof answer === 'string') return answer;
+  // Format multi-blank answer as "1:A, 2:B, 3:C"
+  return Object.entries(answer)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([idx, val]) => `${idx}:${val}`)
+    .join(', ');
+}
+
 export default function Result() {
   const { recordId } = useParams<{ recordId: string }>();
   const record = useMemo(() => (recordId ? getRecord(recordId) : undefined), [recordId]);
@@ -107,10 +117,13 @@ function ResultMcReview({
   answers,
 }: {
   paperQuestions: import('../types').MultiChoiceQuestion[];
-  answers: Record<number, string>;
+  answers: Record<number, string | Record<number, string>>;
 }) {
   // Trim answers for comparison to handle whitespace issues in source data
-  const onlyWrong = paperQuestions.filter(q => q.answer && answers[q.number] && answers[q.number].trim() !== q.answer.trim());
+  const onlyWrong = paperQuestions.filter(q => {
+    const ua = answers[q.number];
+    return q.answer && ua && typeof ua === 'string' && ua.trim() !== q.answer.trim();
+  });
   const unanswered = paperQuestions.filter(q => q.answer && !answers[q.number]);
 
   return (
@@ -129,10 +142,17 @@ function ResultMcReview({
           // Trim answers for comparison to handle whitespace issues
           if (!q.answer) cls += '';
           else if (!ua) cls += '';
-          else if (ua.trim() === q.answer.trim()) cls += ' correct';
+          else if (typeof ua === 'string' && ua.trim() === q.answer.trim()) cls += ' correct';
           else cls += ' wrong';
+          const tooltipText = q.answer
+            ? (typeof ua === 'string' && ua.trim() === q.answer.trim()
+                ? '✓'
+                : ua
+                  ? `✗ ${typeof ua === 'string' ? ua : 'multi-blank'}→${q.answer.trim()}`
+                  : '未答')
+            : '无答案';
           return (
-            <div key={q.number} className={cls} title={`第${q.number}题: ${q.answer ? (ua?.trim() === q.answer.trim() ? '✓' : ua ? '✗ ' + ua + '→' + q.answer.trim() : '未答') : '无答案'}`} style={{ cursor: 'default' }}>
+            <div key={q.number} className={cls} title={`第${q.number}题: ${tooltipText}`} style={{ cursor: 'default' }}>
               {q.number}
             </div>
           );
@@ -142,40 +162,44 @@ function ResultMcReview({
         错题 {onlyWrong.length} 题 · 未答 {unanswered.length} 题
       </div>
       <div className="review-list">
-        {onlyWrong.slice(0, 20).map(q => (
-          <div className="review-item" key={q.number}>
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
-              第 {q.number} 题 <span style={{ color: 'var(--danger)' }}>✗</span>
-              <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontWeight: 400 }}>
-                你的答案: {answers[q.number]} · 正确答案: {q.answer}
-              </span>
-            </div>
-            <div style={{ marginBottom: 8 }}>{q.stem}</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-              {q.options.map(o => (
-                <div
-                  key={o.key}
-                  style={{
-                    fontSize: 13,
-                    color:
-                      o.key === q.answer
-                        ? 'var(--success)'
-                        : o.key === answers[q.number]
-                          ? 'var(--danger)'
-                          : 'var(--text-muted)',
-                  }}
-                >
-                  {o.key}. {o.text}
-                </div>
-              ))}
-            </div>
-            {q.explanation && (
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', background: '#f5f7fa', padding: 8, borderRadius: 3 }}>
-                解析：{q.explanation}
+        {onlyWrong.slice(0, 20).map(q => {
+          const ua = answers[q.number];
+          const userAnswerStr = typeof ua === 'string' ? ua : '';
+          return (
+            <div className="review-item" key={q.number}>
+              <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                第 {q.number} 题 <span style={{ color: 'var(--danger)' }}>✗</span>
+                <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontWeight: 400 }}>
+                  你的答案: {formatAnswer(ua)} · 正确答案: {q.answer}
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+              <div style={{ marginBottom: 8 }}>{q.stem}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+                {q.options.map(o => (
+                  <div
+                    key={o.key}
+                    style={{
+                      fontSize: 13,
+                      color:
+                        o.key === q.answer
+                          ? 'var(--success)'
+                          : o.key === userAnswerStr
+                            ? 'var(--danger)'
+                            : 'var(--text-muted)',
+                    }}
+                  >
+                    {o.key}. {o.text}
+                  </div>
+                ))}
+              </div>
+              {q.explanation && (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', background: '#f5f7fa', padding: 8, borderRadius: 3 }}>
+                  解析：{q.explanation}
+                </div>
+              )}
+            </div>
+          );
+        })}
         {onlyWrong.length > 20 && (
           <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: 12 }}>
             仅显示前 20 道错题，更多请前往错题本
