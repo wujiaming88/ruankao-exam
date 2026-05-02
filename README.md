@@ -8,12 +8,27 @@
 
 - 🎯 **高仿真界面** — 深蓝导航栏 + 左侧科目导航 + 右侧试卷卡片 + 题号面板 + 分屏布局，贴近真实机考环境
 - 📋 **三种题型** — 综合知识（75 题单选）、案例分析（5 题问答）、论文写作（4 选 1）
+- 🎨 **绘图功能** — 集成 [Excalidraw](https://excalidraw.com/) 专业绘图编辑器，支持案例分析中绘制网络图、ER图、UML类图/时序图等，内置 5 种预设模板
 - ⏱️ **考试模式** — 严格倒计时 150 分钟，交卷不可逆，综合知识自动评分
 - 📖 **练习模式** — 选择即出答案，案例/论文可查看参考答案
 - 🔖 **标记功能** — 标记存疑题目，题号面板橙色高亮
 - 💾 **自动保存** — 答题进度实时存入 localStorage，刷新不丢失
 - 📊 **历史记录** — 每次考试成绩存档，支持回顾
 - ❌ **错题本** — 自动收集综合知识错题，针对性复习
+
+## ✂️ 绘图功能
+
+案例分析答题区集成了 [Excalidraw](https://excalidraw.com/) 专业绘图编辑器，支持在答题时绘制：
+
+| 图型 | 说明 |
+|------|------|
+| 单代号网络图 (AON) | 前导图 / Activity On Node |
+| 双代号网络图 (AOA) | 箭线图 / Activity On Arrow |
+| UML 类图 | 类、接口、继承关系 |
+| UML 时序图 | 对象交互序列 |
+| ER 图 | 实体-关系图 |
+
+每种图型提供**预设模板**，可基于模板修改，也可从空白画布开始绘制。
 
 ## 📚 试卷数据
 
@@ -34,6 +49,8 @@
 
 - **Node.js** ≥ 18
 - **npm** ≥ 9（或 pnpm / yarn）
+
+> ⚠️ 项目依赖了 `@excalidraw/excalidraw`，首次克隆或拉取新代码后必须运行 `npm install` 再构建。
 
 ### 安装依赖
 
@@ -151,11 +168,16 @@ ruankao-exam/
 │   │   ├── Exam.tsx              # 考试入口（模式选择 + 路由）
 │   │   ├── exam/
 │   │   │   ├── MultiChoiceExam.tsx  # 综合知识（75 题选择）
-│   │   │   ├── CaseExam.tsx         # 案例分析（分屏问答）
+│   │   │   ├── CaseExam.tsx         # 案例分析（分屏问答 + 绘图）
 │   │   │   └── PaperExam.tsx        # 论文写作（4 选 1）
 │   │   ├── Result.tsx            # 成绩详情
 │   │   ├── History.tsx           # 历史记录
 │   │   └── Mistakes.tsx          # 错题本
+│   ├── drawing/
+│   │   ├── ExcalidrawEditor.tsx  # Excalidraw 绘图编辑器（Modal 弹窗）
+│   │   ├── templates.ts          # 5 种预设模板（AON/AOA/类图/时序图/ER图）
+│   │   ├── types.ts              # 绘图类型定义
+│   │   └── drawing.css           # 绘图样式
 │   ├── components/
 │   │   └── Markdown.tsx          # Markdown 渲染
 │   ├── data/
