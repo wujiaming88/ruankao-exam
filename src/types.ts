@@ -81,6 +81,7 @@ export interface MultiChoiceState {
 export interface CaseState {
   selectedCases: number[];
   answers: Record<number, Record<string, string>>;
+  drawings?: Record<number, Record<string, string>>;
   currentCase: number;
   startedAt: number;
   remainingSec: number;

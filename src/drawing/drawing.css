@@ -1,0 +1,194 @@
+/* Drawing Editor Styles */
+.drawing-editor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.drawing-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border, #e0e0e0);
+  background: #f8f9fa;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.drawing-tools {
+  display: flex;
+  gap: 2px;
+}
+
+.drawing-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.drawing-tool-btn:hover {
+  background: #e9ecef;
+}
+
+.drawing-tool-btn.active {
+  background: #e3f2fd;
+  border-color: #2196F3;
+  color: #1565C0;
+}
+
+.tool-icon {
+  font-size: 14px;
+}
+
+.tool-label {
+  font-size: 11px;
+}
+
+.drawing-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-sm {
+  padding: 3px 8px !important;
+  font-size: 12px !important;
+}
+
+.drawing-canvas-container {
+  position: relative;
+  overflow: auto;
+  flex: 1;
+  min-height: 400px;
+}
+
+.drawing-svg {
+  display: block;
+}
+
+.drawing-status {
+  display: flex;
+  gap: 16px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: #666;
+  border-top: 1px solid var(--border, #e0e0e0);
+  background: #fafbfc;
+}
+
+/* Template modal */
+.drawing-templates-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.drawing-templates-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.drawing-templates-panel h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.template-card {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.template-card:hover {
+  border-color: #2196F3;
+  background: #e3f2fd;
+}
+
+.template-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.template-desc {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Label editor */
+.label-editor input {
+  border: 1px solid #2196F3;
+  border-radius: 3px;
+  outline: none;
+}
+
+/* Insert drawing button in case exam */
+.insert-drawing-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px dashed #999;
+  border-radius: 4px;
+  background: #f8f9fa;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.15s;
+}
+
+.insert-drawing-btn:hover {
+  border-color: #2196F3;
+  color: #1565C0;
+  background: #e3f2fd;
+}
+
+.drawing-thumbnail {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 4px;
+  margin-top: 8px;
+  background: #fefefe;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.drawing-thumbnail:hover {
+  border-color: #2196F3;
+}
+
+.drawing-thumbnail svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

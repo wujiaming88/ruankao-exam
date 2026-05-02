@@ -9,6 +9,9 @@ import {
   saveRecord,
 } from '../../storage';
 import type { CasePaper, CaseState, Exam, ExamMode, ExamRecord } from '../../types';
+import { DrawingEditor, deserializeDrawing, serializeDrawing } from '../../drawing';
+import type { DrawingData } from '../../drawing';
+import '../../drawing/drawing.css';
 
 interface Props {
   exam: Exam;
@@ -60,22 +63,25 @@ export default function CaseExam({ exam, paper, mode }: Props) {
 
   const [selectedCases, setSelectedCases] = useState<number[]>(initialState.selectedCases);
   const [answers, setAnswers] = useState<Record<number, Record<string, string>>>(initialState.answers);
+  const [drawings, setDrawings] = useState<Record<number, Record<string, string>>>(initialState.drawings ?? {});
   const [currentCase, setCurrentCase] = useState<number>(initialState.currentCase);
   const [remainingSec, setRemainingSec] = useState<number>(initialState.remainingSec);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showExit, setShowExit] = useState(false);
+  const [drawingTarget, setDrawingTarget] = useState<{ caseIdx: number; sub: string } | null>(null);
   const startedAtRef = useRef(initialState.startedAt);
 
   useEffect(() => {
     const state: CaseState = {
       selectedCases,
       answers,
+      drawings,
       currentCase,
       startedAt: startedAtRef.current,
       remainingSec,
     };
     saveExamState(exam.id, 'case', mode, state);
-  }, [selectedCases, answers, currentCase, remainingSec, exam.id, mode]);
+  }, [selectedCases, answers, drawings, currentCase, remainingSec, exam.id, mode]);
 
   useEffect(() => {
     if (mode !== 'exam') return;
@@ -101,6 +107,7 @@ export default function CaseExam({ exam, paper, mode }: Props) {
       detail: {
         selectedCases,
         answers,
+        drawings,
         requiredChoose: paper.required + paper.choose,
       },
     };
@@ -139,6 +146,23 @@ export default function CaseExam({ exam, paper, mode }: Props) {
       [caseIdx]: { ...(prev[caseIdx] || {}), [sub]: value },
     }));
   };
+
+  const openDrawing = (caseIdx: number, sub: string) => {
+    setDrawingTarget({ caseIdx, sub });
+  };
+
+  const handleSaveDrawing = useCallback((drawingData: DrawingData) => {
+    if (!drawingTarget) return;
+    const serialized = serializeDrawing(drawingData);
+    setDrawings(prev => ({
+      ...prev,
+      [drawingTarget.caseIdx]: { ...(prev[drawingTarget.caseIdx] || {}), [drawingTarget.sub]: serialized },
+    }));
+  }, [drawingTarget]);
+
+  const handleCloseDrawing = useCallback(() => {
+    setDrawingTarget(null);
+  }, []);
 
   const timerClass =
     mode === 'exam' && remainingSec < 300
@@ -264,6 +288,26 @@ export default function CaseExam({ exam, paper, mode }: Props) {
                     value={(answers[currentCase]?.[sq]) ?? ''}
                     onChange={e => updateAnswer(currentCase, sq, e.target.value)}
                   />
+                  <div style={{ marginTop: 6 }}>
+                    <button
+                      className="insert-drawing-btn"
+                      onClick={() => openDrawing(currentCase, sq)}
+                      data-testid={`btn-drawing-${sq}`}
+                    >
+                      ✏️ {drawings[currentCase]?.[sq] ? '编辑图表' : '插入图表'}
+                    </button>
+                    {drawings[currentCase]?.[sq] && (
+                      <div
+                        className="drawing-thumbnail"
+                        onClick={() => openDrawing(currentCase, sq)}
+                        data-testid={`drawing-thumb-${sq}`}
+                      >
+                        <div style={{ fontSize: 11, color: '#666', padding: '4px 0' }}>
+                          📊 已插入图表（点击编辑）
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))
             )}
@@ -311,6 +355,18 @@ export default function CaseExam({ exam, paper, mode }: Props) {
                 退出
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {drawingTarget && (
+        <div className="modal" data-testid="drawing-modal">
+          <div className="modal-content" style={{ maxWidth: 900, width: '95%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+            <DrawingEditor
+              initialData={drawings[drawingTarget.caseIdx]?.[drawingTarget.sub] ? deserializeDrawing(drawings[drawingTarget.caseIdx][drawingTarget.sub]) : null}
+              onSave={handleSaveDrawing}
+              onClose={handleCloseDrawing}
+            />
           </div>
         </div>
       )}
