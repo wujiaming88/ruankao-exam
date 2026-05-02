@@ -65,24 +65,36 @@ function parseMultiChoice(content) {
 
   const finalQuestions = [...byNumber.values()].sort((a, b) => a.number - b.number);
 
-  // Convert multi-blank questions to blanks array format
+  // Split multi-blank questions into separate single-choice questions
   const processed = [];
   for (const q of finalQuestions) {
-    if (q.isMultiBlank && q.blankCount >= 2) {
-      // Multi-blank: convert answers array to blanks array
-      const blanks = (q.answers || []).map((ans, idx) => ({
-        index: idx + 1,
-        answer: ans,
-      }));
-      processed.push({
-        number: q.number,
-        stem: q.stem,
-        options: q.options,
-        blanks,
-        explanation: q.explanation,
-      });
+    if (q.isMultiBlank && q.blankCount >= 2 && q.answers && q.answers.length >= 2) {
+      // Split into separate questions, one for each blank
+      for (let i = 0; i < q.answers.length; i++) {
+        const blankIndex = i + 1;
+        const questionNumber = q.number + i * 0.1;
+
+        // Clean stem: remove option markers and add blank indicator
+        let cleanStem = q.stem;
+        // Add blank number indicator to stem
+        cleanStem = cleanStem.trim();
+        if (cleanStem.endsWith('）') || cleanStem.endsWith(')')) {
+          // Already has some parenthesis, insert before it
+          cleanStem = `${cleanStem}（本题为第${blankIndex}空）`;
+        } else {
+          cleanStem = `${cleanStem}（本题为第${blankIndex}空）`;
+        }
+
+        processed.push({
+          number: questionNumber,
+          stem: cleanStem,
+          options: q.options, // Share same options
+          answer: q.answers[i],
+          explanation: q.explanation,
+        });
+      }
     } else {
-      // Single answer
+      // Single answer question
       processed.push({
         number: q.number,
         stem: q.stem,

@@ -5,17 +5,11 @@ export interface Option {
   text: string;
 }
 
-export interface Blank {
-  index: number;
-  answer: string;
-}
-
 export interface MultiChoiceQuestion {
   number: number;
   stem: string;
   options: Option[];
-  answer?: string; // Single answer (for single-choice questions)
-  blanks?: Blank[]; // Multiple answers (for multi-blank questions)
+  answer: string;
   explanation: string;
 }
 
@@ -77,7 +71,7 @@ export interface ExamDataset {
 export type ExamMode = 'exam' | 'practice';
 
 export interface MultiChoiceState {
-  answers: Record<number, string | Record<number, string>>; // Single answer or blank_index->answer map
+  answers: Record<number, string>;
   marked: Record<number, boolean>;
   currentIdx: number;
   startedAt: number;
@@ -114,7 +108,7 @@ export interface ExamRecord {
   score?: number;
   total?: number;
   correct?: number;
-  answers?: Record<number, string | Record<number, string>>;
+  answers?: Record<number, string>;
   detail?: unknown;
 }
 
@@ -124,8 +118,8 @@ export interface MistakeItem {
   questionNumber: number;
   stem: string;
   options: Option[];
-  correctAnswer: string | Record<number, string>;
-  userAnswer: string | Record<number, string>;
+  correctAnswer: string;
+  userAnswer: string;
   explanation: string;
   addedAt: number;
 }

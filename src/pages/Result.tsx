@@ -14,16 +14,6 @@ function formatDate(ts: number): string {
   return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 }
 
-function formatAnswer(answer: string | Record<number, string> | undefined): string {
-  if (!answer) return '';
-  if (typeof answer === 'string') return answer;
-  // Format multi-blank answer as "1:A, 2:B, 3:C"
-  return Object.entries(answer)
-    .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([idx, val]) => `${idx}:${val}`)
-    .join(', ');
-}
-
 export default function Result() {
   const { recordId } = useParams<{ recordId: string }>();
   const record = useMemo(() => (recordId ? getRecord(recordId) : undefined), [recordId]);
@@ -117,24 +107,14 @@ function ResultMcReview({
   answers,
 }: {
   paperQuestions: import('../types').MultiChoiceQuestion[];
-  answers: Record<number, string | Record<number, string>>;
+  answers: Record<number, string>;
 }) {
-  // Trim answers for comparison to handle whitespace issues in source data
   const onlyWrong = paperQuestions.filter(q => {
     const ua = answers[q.number];
-    if (q.blanks && q.blanks.length > 0) {
-      // Multi-blank: wrong if any blank is incorrect
-      if (!ua || typeof ua !== 'object') return true;
-      return !q.blanks.every(blank => ua[blank.index]?.trim() === blank.answer.trim());
-    } else if (q.answer) {
-      // Single answer
-      return ua && typeof ua === 'string' && ua.trim() !== q.answer.trim();
-    }
-    return false;
+    return q.answer && ua && ua.trim() !== q.answer.trim();
   });
   const unanswered = paperQuestions.filter(q => {
-    const hasAnswer = q.answer || (q.blanks && q.blanks.length > 0);
-    return hasAnswer && !answers[q.number];
+    return q.answer && !answers[q.number];
   });
 
   return (
@@ -151,31 +131,22 @@ function ResultMcReview({
           const ua = answers[q.number];
           let cls = 'q-btn';
           let isCorrect = false;
-          const hasAnswer = q.answer || (q.blanks && q.blanks.length > 0);
 
-          if (!hasAnswer) {
+          if (!q.answer) {
             cls += '';
           } else if (!ua) {
             cls += '';
-          } else if (q.blanks && q.blanks.length > 0) {
-            // Multi-blank
-            isCorrect = typeof ua === 'object' &&
-                       q.blanks.every(blank => ua[blank.index]?.trim() === blank.answer.trim());
-            cls += isCorrect ? ' correct' : ' wrong';
-          } else if (q.answer) {
-            // Single answer
-            isCorrect = typeof ua === 'string' && ua.trim() === q.answer.trim();
+          } else {
+            isCorrect = ua.trim() === q.answer.trim();
             cls += isCorrect ? ' correct' : ' wrong';
           }
 
-          const correctAnswerText = q.blanks && q.blanks.length > 0
-            ? q.blanks.map(b => `${b.index}:${b.answer}`).join(', ')
-            : q.answer?.trim() || '';
-          const tooltipText = hasAnswer
+          const correctAnswerText = q.answer?.trim() || '';
+          const tooltipText = q.answer
             ? (isCorrect
                 ? '✓'
                 : ua
-                  ? `✗ ${formatAnswer(ua)}→${correctAnswerText}`
+                  ? `✗ ${ua}→${correctAnswerText}`
                   : '未答')
             : '无答案';
           return (
@@ -191,28 +162,21 @@ function ResultMcReview({
       <div className="review-list">
         {onlyWrong.slice(0, 20).map(q => {
           const ua = answers[q.number];
-          const correctAnswerText = q.blanks && q.blanks.length > 0
-            ? q.blanks.map(b => `第${b.index}空: ${b.answer}`).join('，')
-            : q.answer || '';
+          const correctAnswerText = q.answer || '';
 
           return (
             <div className="review-item" key={q.number}>
               <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
                 第 {q.number} 题 <span style={{ color: 'var(--danger)' }}>✗</span>
                 <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontWeight: 400 }}>
-                  你的答案: {formatAnswer(ua)} · 正确答案: {correctAnswerText}
+                  你的答案: {ua} · 正确答案: {correctAnswerText}
                 </span>
               </div>
               <div style={{ marginBottom: 8 }}>{q.stem}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
                 {q.options.map(o => {
-                  const userAnswerStr = typeof ua === 'string' ? ua : '';
-                  const isUserChoice = q.blanks && q.blanks.length > 0
-                    ? (typeof ua === 'object' && ua !== null && Object.values(ua).includes(o.key))
-                    : o.key === userAnswerStr;
-                  const isCorrectChoice = q.blanks && q.blanks.length > 0
-                    ? q.blanks.some(b => b.answer === o.key)
-                    : o.key === q.answer;
+                  const isUserChoice = o.key === ua;
+                  const isCorrectChoice = o.key === q.answer;
 
                   return (
                     <div

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T11:13:06.273Z",
+  "generated_at": "2026-05-02T13:46:35.997Z",
   "stats": {
     "exams": 15,
     "multi_choice": 15,
@@ -13177,7 +13177,7 @@
       "papers": {
         "multi_choice": {
           "duration": 150,
-          "total": 75,
+          "total": 78,
           "questions": [
             {
               "number": 1,
@@ -13565,7 +13565,7 @@
             },
             {
               "number": 17,
-              "stem": "EJB是企业级Java构件。其中，（36）负责完成服务端与客户端的交互；（37）用于数据持久化来简化数据库开发工作；（38）主要用来处理异步并发访问。",
+              "stem": "EJB是企业级Java构件。其中，（36）负责完成服务端与客户端的交互；（37）用于数据持久化来简化数据库开发工作；（38）主要用来处理异步并发访问。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -13584,20 +13584,55 @@
                   "text": "Stateless Bean"
                 }
               ],
-              "blanks": [
+              "answer": "A",
+              "explanation": "Session Bean负责客户端交互，Entity Bean负责数据持久化，Message-driven Bean负责异步并发消息处理。"
+            },
+            {
+              "number": 17.1,
+              "stem": "EJB是企业级Java构件。其中，（36）负责完成服务端与客户端的交互；（37）用于数据持久化来简化数据库开发工作；（38）主要用来处理异步并发访问。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "A"
+                  "key": "A",
+                  "text": "Session Bean"
                 },
                 {
-                  "index": 2,
-                  "answer": "B"
+                  "key": "B",
+                  "text": "Entity Bean"
                 },
                 {
-                  "index": 3,
-                  "answer": "C"
+                  "key": "C",
+                  "text": "Message-driven Bean"
+                },
+                {
+                  "key": "D",
+                  "text": "Stateless Bean"
                 }
               ],
+              "answer": "B",
+              "explanation": "Session Bean负责客户端交互，Entity Bean负责数据持久化，Message-driven Bean负责异步并发消息处理。"
+            },
+            {
+              "number": 17.2,
+              "stem": "EJB是企业级Java构件。其中，（36）负责完成服务端与客户端的交互；（37）用于数据持久化来简化数据库开发工作；（38）主要用来处理异步并发访问。（本题为第3空）",
+              "options": [
+                {
+                  "key": "A",
+                  "text": "Session Bean"
+                },
+                {
+                  "key": "B",
+                  "text": "Entity Bean"
+                },
+                {
+                  "key": "C",
+                  "text": "Message-driven Bean"
+                },
+                {
+                  "key": "D",
+                  "text": "Stateless Bean"
+                }
+              ],
+              "answer": "C",
               "explanation": "Session Bean负责客户端交互，Entity Bean负责数据持久化，Message-driven Bean负责异步并发消息处理。"
             },
             {
@@ -13770,7 +13805,7 @@
             },
             {
               "number": 25,
-              "stem": "企业信息资源集成管理的前提是对企业（22）的集成，其核心是对企业（23）的集成。",
+              "stem": "企业信息资源集成管理的前提是对企业（22）的集成，其核心是对企业（23）的集成。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -13789,16 +13824,31 @@
                   "text": "信息活动"
                 }
               ],
-              "blanks": [
+              "answer": "C",
+              "explanation": "前提是信息设施的集成（基础设施），核心是信息功能的集成。"
+            },
+            {
+              "number": 25.1,
+              "stem": "企业信息资源集成管理的前提是对企业（22）的集成，其核心是对企业（23）的集成。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "C"
+                  "key": "A",
+                  "text": "信息处理"
                 },
                 {
-                  "index": 2,
-                  "answer": "B"
+                  "key": "B",
+                  "text": "信息功能"
+                },
+                {
+                  "key": "C",
+                  "text": "信息设施"
+                },
+                {
+                  "key": "D",
+                  "text": "信息活动"
                 }
               ],
+              "answer": "B",
               "explanation": "前提是信息设施的集成（基础设施），核心是信息功能的集成。"
             },
             {
@@ -15103,7 +15153,7 @@
       "papers": {
         "multi_choice": {
           "duration": 150,
-          "total": 69,
+          "total": 75,
           "questions": [
             {
               "number": 1,
@@ -15539,7 +15589,7 @@
             },
             {
               "number": 19,
-              "stem": "在 4+1 视图中,描述软件到硬件的映射是 (),关注运行状态的是 ()",
+              "stem": "在 4+1 视图中,描述软件到硬件的映射是 (),关注运行状态的是 ()（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -15558,16 +15608,31 @@
                   "text": "部署视图"
                 }
               ],
-              "blanks": [
+              "answer": "D",
+              "explanation": "涉及到硬件节点映射是部署视图,进程视图关注运行着的进程的同步和互斥。"
+            },
+            {
+              "number": 19.1,
+              "stem": "在 4+1 视图中,描述软件到硬件的映射是 (),关注运行状态的是 ()（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "D"
+                  "key": "A",
+                  "text": "逻辑视图"
                 },
                 {
-                  "index": 2,
-                  "answer": "B"
+                  "key": "B",
+                  "text": "进程视图"
+                },
+                {
+                  "key": "C",
+                  "text": "实现视图"
+                },
+                {
+                  "key": "D",
+                  "text": "部署视图"
                 }
               ],
+              "answer": "B",
               "explanation": "涉及到硬件节点映射是部署视图,进程视图关注运行着的进程的同步和互斥。"
             },
             {
@@ -15716,7 +15781,7 @@
             },
             {
               "number": 27,
-              "stem": "在数据库的三级模式中,描述记录间的联系、操作、数据的完整性和安全性等要求是 (),表示用户使用的部分数据的是 ()",
+              "stem": "在数据库的三级模式中,描述记录间的联系、操作、数据的完整性和安全性等要求是 (),表示用户使用的部分数据的是 ()（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -15735,16 +15800,31 @@
                   "text": "用户模式"
                 }
               ],
-              "blanks": [
+              "answer": "B",
+              "explanation": "“描述记录间的联系、操作、数据的完整性和安全性等要求”对应概念模式，因为它定义了数据的整体逻辑结构、约束和规则。“表示用户使用的部分数据”对应外模式，因为它表示用户或应用程序可见的数据子集。"
+            },
+            {
+              "number": 27.1,
+              "stem": "在数据库的三级模式中,描述记录间的联系、操作、数据的完整性和安全性等要求是 (),表示用户使用的部分数据的是 ()（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "B"
+                  "key": "A",
+                  "text": "内模式"
                 },
                 {
-                  "index": 2,
-                  "answer": "C"
+                  "key": "B",
+                  "text": "概念模式"
+                },
+                {
+                  "key": "C",
+                  "text": "外模式"
+                },
+                {
+                  "key": "D",
+                  "text": "用户模式"
                 }
               ],
+              "answer": "C",
               "explanation": "“描述记录间的联系、操作、数据的完整性和安全性等要求”对应概念模式，因为它定义了数据的整体逻辑结构、约束和规则。“表示用户使用的部分数据”对应外模式，因为它表示用户或应用程序可见的数据子集。"
             },
             {
@@ -15797,7 +15877,7 @@
             },
             {
               "number": 31,
-              "stem": "System quality attributes have been of interest to the software community at least since the 1970s. There are a variety of published taxonomies and definitions, and many of them have their own research and practitioner communities. From an () perspective, there are three problems with previous discussions of system quality attributes:\n\nThe definitions provided for an attribute are not operational. It is () to say that a system will be modifiable. Every system is modifiable with respect to one set of changes and not modifiable with respect to another. The other attributes are similar.\n\nA focus of discussion is often on which quality a particular aspect belongs to. Is a system failure an aspect of availability, an aspect of security or an aspect of usability? All three attribute communities would claim ownership of a system failure.\n\nEach attribute community has developed its own (). The () community has 「events」 arriving at a system, the security community has 「attacks」 arriving at a system, the availability community has 「failures」 of a system, and the usability community has 「user input」 All of these may actually refer to the same occurrence, but are described using different terms.\n\nA solution to the first two of these problems (nonoperational definitions and overlapping attribute concerns) is to use quality attribute () as a means of characterizing quality attributes.",
+              "stem": "System quality attributes have been of interest to the software community at least since the 1970s. There are a variety of published taxonomies and definitions, and many of them have their own research and practitioner communities. From an () perspective, there are three problems with previous discussions of system quality attributes:\n\nThe definitions provided for an attribute are not operational. It is () to say that a system will be modifiable. Every system is modifiable with respect to one set of changes and not modifiable with respect to another. The other attributes are similar.\n\nA focus of discussion is often on which quality a particular aspect belongs to. Is a system failure an aspect of availability, an aspect of security or an aspect of usability? All three attribute communities would claim ownership of a system failure.\n\nEach attribute community has developed its own (). The () community has 「events」 arriving at a system, the security community has 「attacks」 arriving at a system, the availability community has 「failures」 of a system, and the usability community has 「user input」 All of these may actually refer to the same occurrence, but are described using different terms.\n\nA solution to the first two of these problems (nonoperational definitions and overlapping attribute concerns) is to use quality attribute () as a means of characterizing quality attributes.（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -15816,28 +15896,103 @@
                   "text": "analyst's"
                 }
               ],
-              "blanks": [
+              "answer": "A",
+              "explanation": "原文明确提到架构师视角 (architect's perspective)。\n原文指出这种说法无意义 (meaningless),因为可修改性需针对具体变更集评估。\n原文强调各领域发展了自己的术语体系 (vocabulary),如性能领域的 \"events\" 和安全领域的 \"attacks\"。\n原文明确说明性能 (performance) 社区使用 \"events\" 描述到达系统的事件。\n原文提出用质量属性场景 (quality attribute scenarios) 解决前两个问题 (非操作性定义和属性重叠)。"
+            },
+            {
+              "number": 31.1,
+              "stem": "System quality attributes have been of interest to the software community at least since the 1970s. There are a variety of published taxonomies and definitions, and many of them have their own research and practitioner communities. From an () perspective, there are three problems with previous discussions of system quality attributes:\n\nThe definitions provided for an attribute are not operational. It is () to say that a system will be modifiable. Every system is modifiable with respect to one set of changes and not modifiable with respect to another. The other attributes are similar.\n\nA focus of discussion is often on which quality a particular aspect belongs to. Is a system failure an aspect of availability, an aspect of security or an aspect of usability? All three attribute communities would claim ownership of a system failure.\n\nEach attribute community has developed its own (). The () community has 「events」 arriving at a system, the security community has 「attacks」 arriving at a system, the availability community has 「failures」 of a system, and the usability community has 「user input」 All of these may actually refer to the same occurrence, but are described using different terms.\n\nA solution to the first two of these problems (nonoperational definitions and overlapping attribute concerns) is to use quality attribute () as a means of characterizing quality attributes.（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "A"
+                  "key": "A",
+                  "text": "architect's /"
                 },
                 {
-                  "index": 2,
-                  "answer": "C"
+                  "key": "B",
+                  "text": "engineers /"
                 },
                 {
-                  "index": 3,
-                  "answer": "B"
+                  "key": "C",
+                  "text": "developers /"
                 },
                 {
-                  "index": 4,
-                  "answer": "A"
-                },
-                {
-                  "index": 5,
-                  "answer": "D"
+                  "key": "D",
+                  "text": "analyst's"
                 }
               ],
+              "answer": "C",
+              "explanation": "原文明确提到架构师视角 (architect's perspective)。\n原文指出这种说法无意义 (meaningless),因为可修改性需针对具体变更集评估。\n原文强调各领域发展了自己的术语体系 (vocabulary),如性能领域的 \"events\" 和安全领域的 \"attacks\"。\n原文明确说明性能 (performance) 社区使用 \"events\" 描述到达系统的事件。\n原文提出用质量属性场景 (quality attribute scenarios) 解决前两个问题 (非操作性定义和属性重叠)。"
+            },
+            {
+              "number": 31.2,
+              "stem": "System quality attributes have been of interest to the software community at least since the 1970s. There are a variety of published taxonomies and definitions, and many of them have their own research and practitioner communities. From an () perspective, there are three problems with previous discussions of system quality attributes:\n\nThe definitions provided for an attribute are not operational. It is () to say that a system will be modifiable. Every system is modifiable with respect to one set of changes and not modifiable with respect to another. The other attributes are similar.\n\nA focus of discussion is often on which quality a particular aspect belongs to. Is a system failure an aspect of availability, an aspect of security or an aspect of usability? All three attribute communities would claim ownership of a system failure.\n\nEach attribute community has developed its own (). The () community has 「events」 arriving at a system, the security community has 「attacks」 arriving at a system, the availability community has 「failures」 of a system, and the usability community has 「user input」 All of these may actually refer to the same occurrence, but are described using different terms.\n\nA solution to the first two of these problems (nonoperational definitions and overlapping attribute concerns) is to use quality attribute () as a means of characterizing quality attributes.（本题为第3空）",
+              "options": [
+                {
+                  "key": "A",
+                  "text": "architect's /"
+                },
+                {
+                  "key": "B",
+                  "text": "engineers /"
+                },
+                {
+                  "key": "C",
+                  "text": "developers /"
+                },
+                {
+                  "key": "D",
+                  "text": "analyst's"
+                }
+              ],
+              "answer": "B",
+              "explanation": "原文明确提到架构师视角 (architect's perspective)。\n原文指出这种说法无意义 (meaningless),因为可修改性需针对具体变更集评估。\n原文强调各领域发展了自己的术语体系 (vocabulary),如性能领域的 \"events\" 和安全领域的 \"attacks\"。\n原文明确说明性能 (performance) 社区使用 \"events\" 描述到达系统的事件。\n原文提出用质量属性场景 (quality attribute scenarios) 解决前两个问题 (非操作性定义和属性重叠)。"
+            },
+            {
+              "number": 31.3,
+              "stem": "System quality attributes have been of interest to the software community at least since the 1970s. There are a variety of published taxonomies and definitions, and many of them have their own research and practitioner communities. From an () perspective, there are three problems with previous discussions of system quality attributes:\n\nThe definitions provided for an attribute are not operational. It is () to say that a system will be modifiable. Every system is modifiable with respect to one set of changes and not modifiable with respect to another. The other attributes are similar.\n\nA focus of discussion is often on which quality a particular aspect belongs to. Is a system failure an aspect of availability, an aspect of security or an aspect of usability? All three attribute communities would claim ownership of a system failure.\n\nEach attribute community has developed its own (). The () community has 「events」 arriving at a system, the security community has 「attacks」 arriving at a system, the availability community has 「failures」 of a system, and the usability community has 「user input」 All of these may actually refer to the same occurrence, but are described using different terms.\n\nA solution to the first two of these problems (nonoperational definitions and overlapping attribute concerns) is to use quality attribute () as a means of characterizing quality attributes.（本题为第4空）",
+              "options": [
+                {
+                  "key": "A",
+                  "text": "architect's /"
+                },
+                {
+                  "key": "B",
+                  "text": "engineers /"
+                },
+                {
+                  "key": "C",
+                  "text": "developers /"
+                },
+                {
+                  "key": "D",
+                  "text": "analyst's"
+                }
+              ],
+              "answer": "A",
+              "explanation": "原文明确提到架构师视角 (architect's perspective)。\n原文指出这种说法无意义 (meaningless),因为可修改性需针对具体变更集评估。\n原文强调各领域发展了自己的术语体系 (vocabulary),如性能领域的 \"events\" 和安全领域的 \"attacks\"。\n原文明确说明性能 (performance) 社区使用 \"events\" 描述到达系统的事件。\n原文提出用质量属性场景 (quality attribute scenarios) 解决前两个问题 (非操作性定义和属性重叠)。"
+            },
+            {
+              "number": 31.4,
+              "stem": "System quality attributes have been of interest to the software community at least since the 1970s. There are a variety of published taxonomies and definitions, and many of them have their own research and practitioner communities. From an () perspective, there are three problems with previous discussions of system quality attributes:\n\nThe definitions provided for an attribute are not operational. It is () to say that a system will be modifiable. Every system is modifiable with respect to one set of changes and not modifiable with respect to another. The other attributes are similar.\n\nA focus of discussion is often on which quality a particular aspect belongs to. Is a system failure an aspect of availability, an aspect of security or an aspect of usability? All three attribute communities would claim ownership of a system failure.\n\nEach attribute community has developed its own (). The () community has 「events」 arriving at a system, the security community has 「attacks」 arriving at a system, the availability community has 「failures」 of a system, and the usability community has 「user input」 All of these may actually refer to the same occurrence, but are described using different terms.\n\nA solution to the first two of these problems (nonoperational definitions and overlapping attribute concerns) is to use quality attribute () as a means of characterizing quality attributes.（本题为第5空）",
+              "options": [
+                {
+                  "key": "A",
+                  "text": "architect's /"
+                },
+                {
+                  "key": "B",
+                  "text": "engineers /"
+                },
+                {
+                  "key": "C",
+                  "text": "developers /"
+                },
+                {
+                  "key": "D",
+                  "text": "analyst's"
+                }
+              ],
+              "answer": "D",
               "explanation": "原文明确提到架构师视角 (architect's perspective)。\n原文指出这种说法无意义 (meaningless),因为可修改性需针对具体变更集评估。\n原文强调各领域发展了自己的术语体系 (vocabulary),如性能领域的 \"events\" 和安全领域的 \"attacks\"。\n原文明确说明性能 (performance) 社区使用 \"events\" 描述到达系统的事件。\n原文提出用质量属性场景 (quality attribute scenarios) 解决前两个问题 (非操作性定义和属性重叠)。"
             },
             {
@@ -16878,11 +17033,11 @@
       "papers": {
         "multi_choice": {
           "duration": 150,
-          "total": 75,
+          "total": 81,
           "questions": [
             {
               "number": 1,
-              "stem": "安全性可划分为多种特性。其中，（ ）保证信息不泄露给未授权的用户、实体或过程；（ ）保证信息的完整和准确，防止信息被非法修改。",
+              "stem": "安全性可划分为多种特性。其中，（ ）保证信息不泄露给未授权的用户、实体或过程；（ ）保证信息的完整和准确，防止信息被非法修改。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -16901,16 +17056,31 @@
                   "text": "完整性"
                 }
               ],
-              "blanks": [
+              "answer": "B",
+              "explanation": "安全性(security)是指系统在向合法用户提供服务的同时能够阻止非授权用户使用的企图或拒绝服务的能力。安全性又可划分为机密性、完整性、不可否认性及可控性等特性。\n\n- 机密性保证信息不泄露给未授权的用户、实体或过程；\n- 完整性保证信息的完整和准确，防止信息被非法修改；\n- 不可否认性是指防止发送方否认发送过信息；\n- 可控性保证对信息的传播及内容具有控制的能力，防止为非法者所用。"
+            },
+            {
+              "number": 1.1,
+              "stem": "安全性可划分为多种特性。其中，（ ）保证信息不泄露给未授权的用户、实体或过程；（ ）保证信息的完整和准确，防止信息被非法修改。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "B"
+                  "key": "A",
+                  "text": "不可否认性"
                 },
                 {
-                  "index": 2,
-                  "answer": "D"
+                  "key": "B",
+                  "text": "机密性"
+                },
+                {
+                  "key": "C",
+                  "text": "可控性"
+                },
+                {
+                  "key": "D",
+                  "text": "完整性"
                 }
               ],
+              "answer": "D",
               "explanation": "安全性(security)是指系统在向合法用户提供服务的同时能够阻止非授权用户使用的企图或拒绝服务的能力。安全性又可划分为机密性、完整性、不可否认性及可控性等特性。\n\n- 机密性保证信息不泄露给未授权的用户、实体或过程；\n- 完整性保证信息的完整和准确，防止信息被非法修改；\n- 不可否认性是指防止发送方否认发送过信息；\n- 可控性保证对信息的传播及内容具有控制的能力，防止为非法者所用。"
             },
             {
@@ -16939,7 +17109,7 @@
             },
             {
               "number": 3,
-              "stem": "数据安全治理的目标主要包括（ ）三个方面。数据安全治理体系是组织达成数据安全治理目标必须具备的能力框架，其中数据分类分级属于该体系中的（ ）。",
+              "stem": "数据安全治理的目标主要包括（ ）三个方面。数据安全治理体系是组织达成数据安全治理目标必须具备的能力框架，其中数据分类分级属于该体系中的（ ）。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -16958,16 +17128,31 @@
                   "text": "满足合规要求、管理数据安全风险、促进数据开发利用"
                 }
               ],
-              "blanks": [
+              "answer": "D",
+              "explanation": "数据安全治理的目标主要有三个：满足合规要求、管理数据安全风险、促进数据开发利用。这些目标旨在确保数据安全与业务发展的双向促进，同时保障组织在数据安全方面的合规性。数据分类分级属于基础安全层。"
+            },
+            {
+              "number": 3.1,
+              "stem": "数据安全治理的目标主要包括（ ）三个方面。数据安全治理体系是组织达成数据安全治理目标必须具备的能力框架，其中数据分类分级属于该体系中的（ ）。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "D"
+                  "key": "A",
+                  "text": "满足用户需求、满足技术安全规范、促进数据开发利用"
                 },
                 {
-                  "index": 2,
-                  "answer": "D"
+                  "key": "B",
+                  "text": "满足合规需求、管理用户安全风险、满足数据安全规范"
+                },
+                {
+                  "key": "C",
+                  "text": "满足用户需求、管理用户安全风险、促进数据开发利用"
+                },
+                {
+                  "key": "D",
+                  "text": "满足合规要求、管理数据安全风险、促进数据开发利用"
                 }
               ],
+              "answer": "D",
               "explanation": "数据安全治理的目标主要有三个：满足合规要求、管理数据安全风险、促进数据开发利用。这些目标旨在确保数据安全与业务发展的双向促进，同时保障组织在数据安全方面的合规性。数据分类分级属于基础安全层。"
             },
             {
@@ -17140,7 +17325,7 @@
             },
             {
               "number": 11,
-              "stem": "质量属性场景是一种面向特定质量属性的需求。它由6部分组成，其中，（ ）用于描述在激励到达后所采取的行动；（ ）不属于可用性质量属性场景中的响应度量方式。",
+              "stem": "质量属性场景是一种面向特定质量属性的需求。它由6部分组成，其中，（ ）用于描述在激励到达后所采取的行动；（ ）不属于可用性质量属性场景中的响应度量方式。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -17159,16 +17344,31 @@
                   "text": "刺激源"
                 }
               ],
-              "blanks": [
+              "answer": "A",
+              "explanation": "质量属性场景由6部分组成：刺激源、刺激、环境、制品、**响应**（激励到达后所采取的行动）、响应度量。可用性质量属性场景的响应度量方式有：1. 可用的时间间隔、2. 可用时间、3. 系统许可在降级模式下运行的时间间隔、4. 故障修复时间。\"数据延迟时间\"不属于可用性响应度量，选D。"
+            },
+            {
+              "number": 11.1,
+              "stem": "质量属性场景是一种面向特定质量属性的需求。它由6部分组成，其中，（ ）用于描述在激励到达后所采取的行动；（ ）不属于可用性质量属性场景中的响应度量方式。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "A"
+                  "key": "A",
+                  "text": "响应"
                 },
                 {
-                  "index": 2,
-                  "answer": "D"
+                  "key": "B",
+                  "text": "环境"
+                },
+                {
+                  "key": "C",
+                  "text": "制品"
+                },
+                {
+                  "key": "D",
+                  "text": "刺激源"
                 }
               ],
+              "answer": "D",
               "explanation": "质量属性场景由6部分组成：刺激源、刺激、环境、制品、**响应**（激励到达后所采取的行动）、响应度量。可用性质量属性场景的响应度量方式有：1. 可用的时间间隔、2. 可用时间、3. 系统许可在降级模式下运行的时间间隔、4. 故障修复时间。\"数据延迟时间\"不属于可用性响应度量，选D。"
             },
             {
@@ -17341,7 +17541,7 @@
             },
             {
               "number": 19,
-              "stem": "在软件架构评估中，（ ）方法采用效用树这一工具来对质量属性进行分类和优先级排序。效用树的结构包括：（ ）。",
+              "stem": "在软件架构评估中，（ ）方法采用效用树这一工具来对质量属性进行分类和优先级排序。效用树的结构包括：（ ）。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -17360,16 +17560,31 @@
                   "text": "CBAM"
                 }
               ],
-              "blanks": [
+              "answer": "B",
+              "explanation": "**ATAM**（架构权衡分析法）采用效用树工具来对质量属性进行分类和优先级排序。效用树的结构为：树根——质量属性——**属性分类**——质量属性场景（叶子节点）。ATAM主要关注性能、安全性、可修改性和可用性4类质量属性。"
+            },
+            {
+              "number": 19.1,
+              "stem": "在软件架构评估中，（ ）方法采用效用树这一工具来对质量属性进行分类和优先级排序。效用树的结构包括：（ ）。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "B"
+                  "key": "A",
+                  "text": "SAEM"
                 },
                 {
-                  "index": 2,
-                  "answer": "A"
+                  "key": "B",
+                  "text": "ATAM"
+                },
+                {
+                  "key": "C",
+                  "text": "SAAM"
+                },
+                {
+                  "key": "D",
+                  "text": "CBAM"
                 }
               ],
+              "answer": "A",
               "explanation": "**ATAM**（架构权衡分析法）采用效用树工具来对质量属性进行分类和优先级排序。效用树的结构为：树根——质量属性——**属性分类**——质量属性场景（叶子节点）。ATAM主要关注性能、安全性、可修改性和可用性4类质量属性。"
             },
             {
@@ -17710,7 +17925,7 @@
             },
             {
               "number": 34,
-              "stem": "在企业集成技术架构层次中，自下而上依次为（ ）。其中，数据集成主要有三种模式，分别为（ ）。",
+              "stem": "在企业集成技术架构层次中，自下而上依次为（ ）。其中，数据集成主要有三种模式，分别为（ ）。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -17729,16 +17944,31 @@
                   "text": "网络集成、会聚集成、数据集成和服务集成"
                 }
               ],
-              "blanks": [
+              "answer": "C",
+              "explanation": "企业集成技术架构自下而上四个层次：**网络集成→数据集成→会聚集成（应用集成）→服务集成**。数据集成主要有三种模式：**数据联邦、数据复制和基于接口的数据集成**。"
+            },
+            {
+              "number": 34.1,
+              "stem": "在企业集成技术架构层次中，自下而上依次为（ ）。其中，数据集成主要有三种模式，分别为（ ）。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "C"
+                  "key": "A",
+                  "text": "网络集成、内容集成、应用集成和会聚集成"
                 },
                 {
-                  "index": 2,
-                  "answer": "A"
+                  "key": "B",
+                  "text": "网络集成、会聚集成、数据集成和应用集成"
+                },
+                {
+                  "key": "C",
+                  "text": "网络集成、数据集成、会聚集成和服务集成"
+                },
+                {
+                  "key": "D",
+                  "text": "网络集成、会聚集成、数据集成和服务集成"
                 }
               ],
+              "answer": "A",
               "explanation": "企业集成技术架构自下而上四个层次：**网络集成→数据集成→会聚集成（应用集成）→服务集成**。数据集成主要有三种模式：**数据联邦、数据复制和基于接口的数据集成**。"
             },
             {
@@ -18439,7 +18669,7 @@
             },
             {
               "number": 64,
-              "stem": "基于软件系统的生命周期，可以将软件系统的质量属性分为开发期质量属性和运行期质量属性两个部分。其中，（ ）关注软件因适应新需求或需求变化而增加新功能的能力；（ ）是关注软件系统同时兼顾向合法用户提供服务，以及阻止非授权使用的能力。",
+              "stem": "基于软件系统的生命周期，可以将软件系统的质量属性分为开发期质量属性和运行期质量属性两个部分。其中，（ ）关注软件因适应新需求或需求变化而增加新功能的能力；（ ）是关注软件系统同时兼顾向合法用户提供服务，以及阻止非授权使用的能力。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -18458,16 +18688,31 @@
                   "text": "可重用性"
                 }
               ],
-              "blanks": [
+              "answer": "B",
+              "explanation": "- **可扩展性**（开发期质量属性）：软件因适应新需求或需求变化而增加新功能的能力，也称为灵活性。\n- **安全性**（运行期质量属性）：软件系统同时兼顾向合法用户提供服务，以及阻止非授权使用的能力。"
+            },
+            {
+              "number": 64.1,
+              "stem": "基于软件系统的生命周期，可以将软件系统的质量属性分为开发期质量属性和运行期质量属性两个部分。其中，（ ）关注软件因适应新需求或需求变化而增加新功能的能力；（ ）是关注软件系统同时兼顾向合法用户提供服务，以及阻止非授权使用的能力。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "B"
+                  "key": "A",
+                  "text": "安全性"
                 },
                 {
-                  "index": 2,
-                  "answer": "B"
+                  "key": "B",
+                  "text": "可扩展性"
+                },
+                {
+                  "key": "C",
+                  "text": "性能"
+                },
+                {
+                  "key": "D",
+                  "text": "可重用性"
                 }
               ],
+              "answer": "B",
               "explanation": "- **可扩展性**（开发期质量属性）：软件因适应新需求或需求变化而增加新功能的能力，也称为灵活性。\n- **安全性**（运行期质量属性）：软件系统同时兼顾向合法用户提供服务，以及阻止非授权使用的能力。"
             },
             {
@@ -18812,7 +19057,7 @@
       "papers": {
         "multi_choice": {
           "duration": 150,
-          "total": 75,
+          "total": 76,
           "questions": [
             {
               "number": 1,
@@ -20328,7 +20573,7 @@
             },
             {
               "number": 64,
-              "stem": "安全性（Security）是指系统在向合法用户提供服务的同时能够阻止非授权用户使用的企图或拒绝服务的能力。安全性可根据系统可能受到的安全威胁类型来分类。其中，（  ）保证信息不泄露给未授权的用户、实体或过程；（  ）是指信息交换的双方不能否认其在交换过程中发送信息或接收信息的行为。",
+              "stem": "安全性（Security）是指系统在向合法用户提供服务的同时能够阻止非授权用户使用的企图或拒绝服务的能力。安全性可根据系统可能受到的安全威胁类型来分类。其中，（  ）保证信息不泄露给未授权的用户、实体或过程；（  ）是指信息交换的双方不能否认其在交换过程中发送信息或接收信息的行为。（本题为第1空）",
               "options": [
                 {
                   "key": "A",
@@ -20347,16 +20592,31 @@
                   "text": "机密性"
                 }
               ],
-              "blanks": [
+              "answer": "D",
+              "explanation": "信息安全的基本属性包括：机密性（Confidentiality）—保证信息不泄露给未授权的用户；完整性（Integrity）—保证信息不被未授权地篡改；可用性（Availability）—保证合法用户能获得信息和服务；不可否认性（Non-repudiation）—信息交换双方不能否认其发送或接收信息的行为；可控性（Controllability）—对信息的传播及内容具有控制能力。第一空选D（机密性），第二空选C（不可否认性）。"
+            },
+            {
+              "number": 64.1,
+              "stem": "安全性（Security）是指系统在向合法用户提供服务的同时能够阻止非授权用户使用的企图或拒绝服务的能力。安全性可根据系统可能受到的安全威胁类型来分类。其中，（  ）保证信息不泄露给未授权的用户、实体或过程；（  ）是指信息交换的双方不能否认其在交换过程中发送信息或接收信息的行为。（本题为第2空）",
+              "options": [
                 {
-                  "index": 1,
-                  "answer": "D"
+                  "key": "A",
+                  "text": "可控性"
                 },
                 {
-                  "index": 2,
-                  "answer": "C"
+                  "key": "B",
+                  "text": "完整性"
+                },
+                {
+                  "key": "C",
+                  "text": "不可否认性"
+                },
+                {
+                  "key": "D",
+                  "text": "机密性"
                 }
               ],
+              "answer": "C",
               "explanation": "信息安全的基本属性包括：机密性（Confidentiality）—保证信息不泄露给未授权的用户；完整性（Integrity）—保证信息不被未授权地篡改；可用性（Availability）—保证合法用户能获得信息和服务；不可否认性（Non-repudiation）—信息交换双方不能否认其发送或接收信息的行为；可控性（Controllability）—对信息的传播及内容具有控制能力。第一空选D（机密性），第二空选C（不可否认性）。"
             },
             {
